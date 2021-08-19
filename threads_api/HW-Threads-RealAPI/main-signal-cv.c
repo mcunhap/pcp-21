@@ -51,5 +51,7 @@ int main(int argc, char *argv[]) {
     signal_wait(&s);
     printf("this should print last\n");
 
+    // join avoid thread sanitizer indicate thread leak
+    Pthread_join(p, NULL);
     return 0;
 }

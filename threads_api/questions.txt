@@ -1,0 +1,50 @@
+QUESTIONS
+
+1)
+Points to 'balance' variable correctly.
+The report give the following informations:
+- which lines of code and threads call the global variable 'balance'
+- the size of both writes at 'balance'
+- show memory space allocated to this variable
+- thread pid and where it was created
+
+2)
+- If we remove one of the lines, nothing is reported.
+- Adding lock around one of the updates:
+  Report show us a data race like at exercise one. But now report that we have created a Mutex.
+- Adding lock around both updates:
+  Nothing is reported, because we dont have a data race anymore
+
+3)
+Thread p1 lock m1 and p2 lock m2, and then p1 have to wait p2 to unlock m2, but p2 is waiting p1 to unlock m1
+This scenario can happen.
+If p1 lock m1 and lock m2 too, before p2 execute, then p1 unlock boths and m2 can lock m2 and m1 (this can happen too, right??)
+
+4)
+Using clang -fsanitize=thread -g -O1 main-deadlock.c dont report anything.
+
+5)
+Using clang -fsanitize=thread -g -O1 main-deadlock-global.c dont report anything.
+In main-deadlock-global the deadlock cant happen, because we have a mutex wrapping the thread from begin to end. So, if p1 start the thread first then it will lock m1, m2 and after unlock m1, m2 and g. After p1 unlock g, p2 can execute. P2 will lock m2, m1 and after that unlock m1, m2 and g.
+Question: can unlock instructions be reordered by compiler?
+
+6)
+Parent stay locked inside while(true)
+
+7)
+Report show us a data race around the global variable done. Compiler can reorganize the code and the thread can execute done=1 before done=0. In this case the parent will stay locked inside while loop (????)
+
+8)
+Init guarantee done variable is initialized before another piece of code can use.
+Here we have the correct way to make a thread wait another before do something.
+
+thread executes before signal_wait:
+ - done = 1
+ - conditional signal
+ then signal wait can execute, dont enter at while because done = 1
+
+Questions:
+- why we still need while here?
+- compiler can change make signal wait executes before thread?
+
+9) Reports thread leak, because we dont use pthread_join to wait thread finish
