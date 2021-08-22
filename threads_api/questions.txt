@@ -44,7 +44,6 @@ thread executes before signal_wait:
  then signal wait can execute, dont enter at while because done = 1
 
 Questions:
-- why we still need while here?
 - compiler can change make signal wait executes before thread?
 
 9) Reports thread leak, because we dont use pthread_join to wait thread finish
