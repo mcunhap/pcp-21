@@ -52,7 +52,7 @@ void fill(int [] array, int value) {
 void deposita(tbuffer* buffer, int item) {
   /* <await (is_empty(falta_ler[next_free]) fill(falta_ler[next_free], 1)> */
   P(e);
-  if (is_empty(falta_ler[next_free])) { pb++; V(e); P(sp); }
+  if (!is_empty(falta_ler[next_free])) { pb++; V(e); P(sp); }
   fill(falta_ler[next_free], 1)
   SIGNAL
 
