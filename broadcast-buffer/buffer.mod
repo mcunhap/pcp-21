@@ -12,25 +12,27 @@ ps: deve ser iniciado tudo com zero
 int next_data[C];
 
 /*
-A matrix falta_ler é um auxiliar para saber qual consumidor consumiu de cada uma das posições. Para isso ele tem tamanho NxC, onde N é o tamanho do Buffer e C é o número de consumidores. Sempre que um produtor consumir ele precisa preencher todas C posições da próxima posição livre com 1. Sempre que um consumidor consumir ele precisa transformar tornar a sua posição C em zero.
+A matrix falta_ler é um auxiliar, que deve ser iniciada com zero em todas posições, para saber qual consumidor consumiu de cada uma das posições. Para isso ele tem tamanho NxC, onde N é o tamanho do Buffer e C é o número de consumidores. Sempre que um produtor consumir ele precisa preencher todas C posições da próxima posição livre com 1. Sempre que um consumidor consumir ele precisa tornar a sua posição C em zero.
 
 Por exemplo:
 N= 4, C=3
 
-Quando o buffer todo esta cheio, o array falta_ler fica representado da seguinte maneira:
-[1 1 1 1]
-[1 1 1 1]
-[1 1 1 1]
+Quando o buffer todo esta cheio, a matriz falta_ler fica representado da seguinte maneira:
+[1 1 1]
+[1 1 1]
+[1 1 1]
+[1 1 1]
 
-Quando C1 consumiu do buffer cheio, falta_ler fica representado da seguinte maneira:
-[0 1 1 1]
-[1 1 1 1]
-[1 1 1 1]
+Quando C1 consumiu do buffer cheio, a matriz falta_ler fica representado da seguinte maneira:
+[0 1 1]
+[1 1 1]
+[1 1 1]
+[1 1 1]
 */
 int falta_ler[N][C];
 
 /*
-O Produtor deve aguardar o array falta_ler na próxima posição livre ter todas posições vazias. Depois ele preenche todas posições do falta_ler[next_free] com 1. Com isso ele pode produzir, e no final faz a operação atomica para incrementar a proxima posição livre do buffer.
+O Produtor deve aguardar a matriz falta_ler na próxima posição livre ter todas colunas zeradas (representando que a posição esta livre para receber um novo item). Depois ele preenche todas posições do falta_ler[next_free] com 1. Com isso ele pode produzir, e no final faz a operação atomica para incrementar a proxima posição livre do buffer.
 ps: metodos auxiliares is_empty e fill no final do arquivo
 */
 
@@ -44,7 +46,7 @@ void deposita(tbuffer* buffer, int item) {
 }
 
 /*
-O Consumidor deve aguardar o array falta_ler na próxima posição dele de leitura, na posição dele de consumo ficar maior que zero (isso representa que tem dado para consumir nessa posição e que ele ainda não consumiu). Depois ele precisa setar essa posição para zero, indicando que ele consumiu e então consumir. Por final ele faz uma operação atomica para incrementar a proxima posição de leitura de dado dele.
+O Consumidor deve aguardar a matriz falta_ler na sua linha de leitura e coluna de consumo ficar maior que zero (isso representa que tem dado para consumir nessa posição e que ele ainda não consumiu). Depois ele precisa setar essa posição para zero, indicando que ele consumiu e então consumir. Por final ele faz uma operação atomica para incrementar a proxima posição de leitura de dado dele.
 */
 
 int consome(tbuffer* buffer, int meuid) {
