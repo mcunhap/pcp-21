@@ -19,11 +19,10 @@
 #include <stdio.h>
 #include <pthread.h>
 #include <semaphore.h>
-#include <errno.h>
 #include "buffer.h"
 
 #define N 4
-#define P 1
+#define P 5
 #define C 3
 #define I 5
 
@@ -38,7 +37,6 @@ int cb = 0; // consumidor bloqueado
 
 int next_free = 0;
 int *next_data; // cada pos iniciada com zero
-/* int falta_ler[N][C]; */
 int **falta_ler;
 
 struct sbuffer {
@@ -57,14 +55,15 @@ void print_falta_ler() {
   }
 }
 
-void print_buffer(tbuffer* buffer) {
+void print_buffer(tbuffer* buffer, long thread) {
+  printf("[%lu]", thread);
   for(int i=0; i<buffer->numpos; i++) {
-    printf("posição %d: %d ", i, buffer->itens[i]);
+    printf("|%d| ", buffer->itens[i]);
   }
   printf("\n");
 }
 
-tbuffer* iniciabuffer (int numpos, int numprod, int numcos) {
+tbuffer* iniciabuffer(int numpos, int numprod, int numcos) {
   tbuffer *buffer = calloc(1, sizeof(tbuffer));
 
   if(!buffer) {
@@ -84,8 +83,8 @@ tbuffer* iniciabuffer (int numpos, int numprod, int numcos) {
   return buffer;
 }
 
-void finalizabuffer (tbuffer* buffer) {
-  free (buffer);
+void finalizabuffer(tbuffer* buffer) {
+  free(buffer);
 }
 
 int is_empty(int *array, int size) {
@@ -121,46 +120,38 @@ int** matriz_vazia(int linhas, int colunas) {
 }
 
 void c_signal() {
-  /* if (pb > 0 && falta_ler[next_free] == 0) { */
-  /*   pb--; sem_post(&sp); */
+  if (pb > 0 && is_empty(falta_ler[next_free], C)) {
+    pb--;
+    sem_post(&sp);
   /* } else if (cb > 0 && falta_ler[next_data] > 0) { */
   /*   cb--; sem_post(&sc); */
-  /* } else { */
-    /* sem_post(&e); */
-  /* } */
+  } else {
+    sem_post(&e);
+  }
 }
 
-void deposita (tbuffer* buffer, int item) {
-  printf("Produziu: %d\n", item);
-
-  /* <await (is_empty(falta_ler[next_free]) fill(falta_ler[next_free], 1)> */
-  /* P(e); */
+void deposita(tbuffer* buffer, int item) {
   sem_wait(&e);
-  /* if (!is_empty(falta_ler[next_free])) { pb++; V(e); P(sp); } */
+  print_buffer(buffer, (long)pthread_self());
 
-  print_falta_ler();
-  printf("next_free: %d", next_free);
-  printf("\n");
   if (!is_empty(falta_ler[next_free], C)) {
-    printf("WAIT LIST\n");
+    printf("[%lu]WAIT LIST\n", (long)pthread_self());
     pb++;
     sem_post(&e);
     sem_wait(&sp);
   }
-  /* fill(falta_ler[next_free], 1) */
+
   fill(falta_ler[next_free], 1, C);
-  print_falta_ler();
-  /* SIGNAL */
+
+  printf("[%lu]Producao: %d. ", (long)pthread_self(), item);
+  printf("Produziu: %d\n", item);
   c_signal();
 
   /* produz */
   buffer->itens[next_free] = item;
 
-  /* <next_free = (next_free + 1) % N> */
-  /* P(e); */
   sem_wait(&e);
   next_free = (next_free + 1) % N;
-  /* SIGNAL */
   c_signal();
 
   printf("\n");
@@ -174,7 +165,6 @@ void* produtor () {
   for (int i=0; i<I; i++) {
     int item = rand() % 100;
 
-    printf("Produtor: %d. ", i);
     deposita(buffer, item);
   }
 
@@ -192,13 +182,18 @@ void* consumidor () {
 }
 
 int main (void) {
-  pthread_t produtor_thread;
-  pthread_t consumidor_thread;
+  int error;
 
-  int sem_init_error = sem_init(&e, 0, 4);
+  pthread_t *produtores;
+  produtores = (pthread_t *)calloc(P, sizeof(pthread_t));
+
+
+  // Semaforo e inicializado 'liberado'
+  int sem_init_error = sem_init(&e, 0, 1);
   if (sem_init_error) { printf("Falha ao iniciar semaforo"); return 1;}
 
-  sem_init_error = sem_init(&sp, 0, 1);
+  // Semaforo sp inicializado 'ocupado'
+  sem_init_error = sem_init(&sp, 0, 0);
   if (sem_init_error) { printf("Falha ao iniciar semaforo"); return 1;}
   /* int numpos, numprod, numcons; */
 
@@ -215,16 +210,6 @@ int main (void) {
 
   /* printf("tamanho: %d, produtores: %d, consumidores: %d, ", buffer->numpos, buffer->numprod, buffer->numcos); */
 
-  print_buffer(buffer);
-  print_falta_ler();
-
-  int error = pthread_create(&produtor_thread, NULL, &produtor, NULL);
-
-  if (error) {
-    printf("Falha ao criar a thread com id: %lu\n", (long)produtor_thread);
-    return 1;
-  }
-
 /*   error = pthread_create(&consumidor_thread, NULL, &consumidor, NULL); */
 
 /*   if (error) { */
@@ -232,11 +217,22 @@ int main (void) {
 /*     return 1; */
 /*   } */
 
-  error = pthread_join(produtor_thread, NULL);
+  for (int i=0; i<P; i++) {
+    error = pthread_create(&produtores[i], NULL, &produtor, NULL);
 
-  if (error) {
-    printf("Falha ao esperar execucao da thread: %lu\n", (long)produtor_thread);
-    return 1;
+    if (error) {
+      printf("Falha ao criar a thread com id: %lu\n", (long)produtores[i]);
+      return 1;
+    }
+  }
+
+  for (int i=0; i<P; i++) {
+    error = pthread_join(produtores[i], NULL);
+
+    if (error) {
+      printf("Falha ao esperar execucao da thread: %lu\n", (long)produtores[i]);
+      return 1;
+    }
   }
 
   /* error = pthread_join(consumidor_thread, NULL); */
@@ -246,7 +242,7 @@ int main (void) {
   /*   return 1; */
   /* } */
 
-  print_buffer(buffer);
+  /* print_buffer(buffer); */
 
   finalizabuffer(buffer);
   return 0;
