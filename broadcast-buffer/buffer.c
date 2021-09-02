@@ -123,7 +123,7 @@ void c_signal() {
   if (pb > 0 && is_empty(falta_ler[next_free], C)) {
     pb--;
     sem_post(&sp);
-  /* } else if (cb > 0 && falta_ler[next_data] > 0) { */
+  /* } else if (cb > 0 && !is_empty(falta_ler[next_data], C)) { */
   /*   cb--; sem_post(&sc); */
   } else {
     sem_post(&e);
@@ -143,11 +143,11 @@ void deposita(tbuffer* buffer, int item) {
 
   fill(falta_ler[next_free], 1, C);
 
-  printf("[%lu]Producao: %d. ", (long)pthread_self(), item);
-  printf("Produziu: %d\n", item);
+  printf("[%lu]Producao: %d.\n", (long)pthread_self(), item);
   c_signal();
 
   /* produz */
+  // deveria estar protegido por algum lock?
   buffer->itens[next_free] = item;
 
   sem_wait(&e);
@@ -158,7 +158,28 @@ void deposita(tbuffer* buffer, int item) {
 }
 
 int consome (tbuffer* buffer, int meuid) {
-  return 6;
+  sem_wait(&e);
+  /* print_buffer(buffer, (long)pthread_self()); */
+
+  if (falta_ler[next_data[meuid]][meuid] == 0) {
+    cb++;
+    sem_post(&e);
+    sem_wait(&sp);
+  }
+
+  falta_ler[next_data[meuid]][meuid] = 0;
+  c_signal();
+
+  /* consome */
+  int data = buffer->itens[next_data[meuid]];
+
+  sem_post(&e);
+  /* printf("%d", data); */
+  next_data[meuid] = (next_data[meuid] + 1) % N;
+  printf("[%lu]Consumidor: %d. Consumiu: %d\n", pthread_self(), meuid, data);
+  c_signal();
+
+  return data;
 }
 
 void* produtor () {
@@ -171,11 +192,14 @@ void* produtor () {
   return NULL;
 }
 
-void* consumidor () {
-  for (int i=0; i<I; i++) {
-    int item = consome(buffer, i);
+void* consumidor (void *arg) {
+  int *id_consumidor = (int*)arg;
 
-    printf("Consumidor: %d. Consumiu: %d\n", i, item);
+  for (int i=0; i<I; i++) {
+    int item = consome(buffer, *id_consumidor);
+
+    item++;
+    /* printf("[%lu]Consumidor: %d. Consumiu: %d\n", pthread_self(), *id_consumidor, item); */
   }
 
   return NULL;
@@ -187,6 +211,9 @@ int main (void) {
   pthread_t *produtores;
   produtores = (pthread_t *)calloc(P, sizeof(pthread_t));
 
+  pthread_t *consumidores;
+  consumidores = (pthread_t *)calloc(C, sizeof(pthread_t));
+
 
   // Semaforo e inicializado 'liberado'
   int sem_init_error = sem_init(&e, 0, 1);
@@ -195,6 +222,11 @@ int main (void) {
   // Semaforo sp inicializado 'ocupado'
   sem_init_error = sem_init(&sp, 0, 0);
   if (sem_init_error) { printf("Falha ao iniciar semaforo"); return 1;}
+
+  // Semaforo sc inicializado 'ocupado'
+  sem_init_error = sem_init(&sc, 0, 0);
+  if (sem_init_error) { printf("Falha ao iniciar semaforo"); return 1;}
+
   /* int numpos, numprod, numcons; */
 
   /* printf("Digite o numero de espaços na lista:\n"); */
@@ -210,18 +242,23 @@ int main (void) {
 
   /* printf("tamanho: %d, produtores: %d, consumidores: %d, ", buffer->numpos, buffer->numprod, buffer->numcos); */
 
-/*   error = pthread_create(&consumidor_thread, NULL, &consumidor, NULL); */
-
-/*   if (error) { */
-/*     printf("Falha ao criar a thread com id: %lu\n", (long)consumidor_thread); */
-/*     return 1; */
-/*   } */
-
   for (int i=0; i<P; i++) {
     error = pthread_create(&produtores[i], NULL, &produtor, NULL);
 
     if (error) {
       printf("Falha ao criar a thread com id: %lu\n", (long)produtores[i]);
+      return 1;
+    }
+  }
+
+  for (int i=0; i<C; i++) {
+    int *id_consumidor = (int*)calloc(1,sizeof(int));
+    *id_consumidor = i;
+
+    error = pthread_create(&consumidores[i], NULL, &consumidor, (void*)id_consumidor);
+
+    if (error) {
+      printf("Falha ao criar a thread com id: %lu\n", (long)consumidores[i]);
       return 1;
     }
   }
@@ -235,12 +272,14 @@ int main (void) {
     }
   }
 
-  /* error = pthread_join(consumidor_thread, NULL); */
+  for (int i=0; i<C; i++) {
+    error = pthread_join(consumidores[i], NULL);
 
-  /* if (error) { */
-  /*   printf("Falha ao esperar execucao da thread: %lu\n", (long)consumidor_thread); */
-  /*   return 1; */
-  /* } */
+    if (error) {
+      printf("Falha ao esperar execucao da thread: %lu\n", (long)consumidores[i]);
+      return 1;
+    }
+  }
 
   /* print_buffer(buffer); */
 
