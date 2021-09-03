@@ -92,3 +92,29 @@ void fill(int [] array, int value) {
     array[i] = value;
   }
 }
+
+
+===========================================================================================
+
+int consumiu[numcons];
+int produzidos;
+
+void deposita(tbuffer* buffer, int item) {
+  <await (falta_ler[next_free] == 0) falta_ler[next_free] = numcons>
+
+  /* produz */
+  buffer[next_free] = item
+  produzidos++
+
+  <next_free = (next_free + 1) % N>
+}
+
+int consome(tbuffer* buffer, int meuid) {
+  <await (falta_ler[next_data[meuid]] > 0 && consumiu[meuid] < produzidos) falta_ler[next_data[meuid]]-->
+
+  /* consome */
+  print(buffer[next_data[meuid]])
+  consumidos[meuid]++;
+
+  <next_data[meuid] = (next_data[meuid] + 1) % N>
+}
