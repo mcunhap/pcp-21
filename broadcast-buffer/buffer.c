@@ -19,12 +19,13 @@
 #include <stdio.h>
 #include <pthread.h>
 #include <semaphore.h>
+#include <unistd.h>
 #include "buffer.h"
 
 #define N 4
 #define P 5
 #define C 3
-#define I 5
+#define I 2
 
 /* passar buffer como argumento das threads, ou manter como variavel global? */
 tbuffer *buffer;
@@ -93,32 +94,17 @@ void finalizabuffer(tbuffer* buffer) {
   free(buffer);
 }
 
-/* int is_empty(int *array, int size) { */
-/*   for(int i=0; i<size; i++) { */
-/*     if(array[i] > 0) { return 0; } */
-/*   } */
-
-/*   return 1; */
-/* } */
-
-/* void fill(int *array, int value, int size) { */
-/*   for(int i=0; i<size; i++) { */
-/*     array[i] = value; */
-/*   } */
-/* } */
-
 int* array_vazio(int tam) {
   int *array = (int*)calloc(tam, sizeof(int));
 
   return array;
 }
 
-void c_signal() {
+void sinal(int tam_buffer) {
   if (pb > 0 && falta_ler[next_free] == 0) {
-    pb--;
-    sem_post(&sp);
-  /* } else if (cb > 0 && falta_ler[next_data] > 0) { */
-  /*   cb--; sem_post(&sc); */
+    pb--; sem_post(&sp);
+  } else if (cb > 0 && falta_ler[(next_free - 1) % tam_buffer] > 0) {
+    cb--; sem_post(&sc);
   } else {
     sem_post(&e);
   }
@@ -126,10 +112,9 @@ void c_signal() {
 
 void deposita(tbuffer* buffer, int item) {
   sem_wait(&e);
-  print_buffer(buffer, (long)pthread_self());
 
   if (falta_ler[next_free] > 0) {
-    printf("[%lu]WAIT LIST\n", (long)pthread_self());
+    printf("[Prod][%lu]WAIT LIST\n", (long)pthread_self());
     pb++;
     sem_post(&e);
     sem_wait(&sp);
@@ -137,23 +122,23 @@ void deposita(tbuffer* buffer, int item) {
 
   falta_ler[next_free] = buffer->numcos;
 
-  printf("[%lu]Producao: %d.\n", (long)pthread_self(), item);
+  printf("[%lu]Producao: %d. ", (long)pthread_self(), item);
 
   buffer->itens[next_free] = item;
   produzidos++;
-  c_signal();
+  printf("Total: %d\n", produzidos);
+  print_buffer(buffer, (long)pthread_self());
 
-  //lock?
-
-  sem_wait(&e);
-  next_free = (next_free + 1) % N;
-  c_signal();
+  next_free = (next_free + 1) % buffer->numpos;
+  sinal(buffer->numpos);
 }
 
 int consome(tbuffer* buffer, int meuid) {
   sem_wait(&e);
 
-  if(falta_ler[next_data[meuid]] == 0 || consumidos[meuid] == produzidos) {
+  // Colocamos while em vez de if devido aos consumidores gulosos, que tentam comer o que ja comeram. Com o while o teste consumidos[meuid] == produzidos acontece novamente travando eles.
+  while(falta_ler[next_data[meuid]] == 0 || consumidos[meuid] == produzidos) {
+    printf("[Cons %d][%lu]WAIT LIST\n", meuid, (long)pthread_self());
     cb++;
     sem_post(&e);
     sem_wait(&sc);
@@ -163,14 +148,11 @@ int consome(tbuffer* buffer, int meuid) {
 
   int data = buffer->itens[next_data[meuid]];
   consumidos[meuid]++;
-  c_signal();
 
-  //lock?
 
-  sem_post(&e);
-  next_data[meuid] = (next_data[meuid] + 1) % N;
-  printf("[%lu]Consumidor: %d. Consumiu: %d\n", pthread_self(), meuid, data);
-  c_signal();
+  next_data[meuid] = (next_data[meuid] + 1) % buffer->numpos;
+  printf("[%lu]Consumidor: %d. Consumiu: %d. Total: %d\n", pthread_self(), meuid, data, consumidos[meuid]);
+  sinal(buffer->numpos);
 
   return data;
 }
@@ -188,11 +170,10 @@ void* produtor () {
 void* consumidor (void *arg) {
   int *id_consumidor = (int*)arg;
 
-  for (int i=0; i<I; i++) {
+  for (int i=0; i<P*I; i++) {
     int item = consome(buffer, *id_consumidor);
 
     item++;
-    /* printf("[%lu]Consumidor: %d. Consumiu: %d\n", pthread_self(), *id_consumidor, item); */
   }
 
   return NULL;
@@ -207,7 +188,6 @@ int main (void) {
   pthread_t *consumidores;
   consumidores = (pthread_t *)calloc(C, sizeof(pthread_t));
 
-
   // Semaforo e inicializado 'liberado'
   int sem_init_error = sem_init(&e, 0, 1);
   if (sem_init_error) { printf("Falha ao iniciar semaforo"); return 1;}
@@ -217,8 +197,10 @@ int main (void) {
   if (sem_init_error) { printf("Falha ao iniciar semaforo"); return 1;}
 
   // Semaforo sc inicializado 'ocupado'
+  /* for(int i=0; i<C; i++) { */
   sem_init_error = sem_init(&sc, 0, 0);
   if (sem_init_error) { printf("Falha ao iniciar semaforo"); return 1;}
+  /* } */
 
   /* int numpos, numprod, numcons; */
 
