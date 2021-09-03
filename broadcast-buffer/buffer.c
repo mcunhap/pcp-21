@@ -22,10 +22,10 @@
 #include <unistd.h>
 #include "buffer.h"
 
-#define N 4
-#define P 5
-#define C 3
-#define I 2
+#define N 5
+#define P 3
+#define C 8
+#define I 3
 
 /* passar buffer como argumento das threads, ou manter como variavel global? */
 tbuffer *buffer;
@@ -50,12 +50,6 @@ struct sbuffer {
   int *itens;
 };
 
-void print_falta_ler() {
-  for (int i=0; i<N; i++) {
-    printf("|%d| ", falta_ler[i]);
-  }
-}
-
 void print_buffer(tbuffer* buffer, long thread) {
   printf("[%lu]", thread);
   for(int i=0; i<buffer->numpos; i++) {
@@ -64,10 +58,10 @@ void print_buffer(tbuffer* buffer, long thread) {
   printf("\n");
 }
 
-void print_consumidos() {
-  for (int i=0; i<C; i++) {
-    printf("|%d| ", consumidos[i]);
-  }
+int* array_vazio(int tam) {
+  int *array = (int*)calloc(tam, sizeof(int));
+
+  return array;
 }
 
 tbuffer* iniciabuffer(int numpos, int numprod, int numcos) {
@@ -92,12 +86,6 @@ tbuffer* iniciabuffer(int numpos, int numprod, int numcos) {
 
 void finalizabuffer(tbuffer* buffer) {
   free(buffer);
-}
-
-int* array_vazio(int tam) {
-  int *array = (int*)calloc(tam, sizeof(int));
-
-  return array;
 }
 
 void sinal(int tam_buffer) {
@@ -197,10 +185,8 @@ int main (void) {
   if (sem_init_error) { printf("Falha ao iniciar semaforo"); return 1;}
 
   // Semaforo sc inicializado 'ocupado'
-  /* for(int i=0; i<C; i++) { */
   sem_init_error = sem_init(&sc, 0, 0);
   if (sem_init_error) { printf("Falha ao iniciar semaforo"); return 1;}
-  /* } */
 
   /* int numpos, numprod, numcons; */
 
@@ -256,8 +242,6 @@ int main (void) {
       return 1;
     }
   }
-
-  /* print_buffer(buffer); */
 
   finalizabuffer(buffer);
   return 0;
