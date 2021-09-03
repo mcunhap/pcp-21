@@ -22,12 +22,8 @@
 #include <unistd.h>
 #include "buffer.h"
 
-#define N 5
-#define P 3
-#define C 8
-#define I 3
+int N, P, C, I;
 
-/* passar buffer como argumento das threads, ou manter como variavel global? */
 tbuffer *buffer;
 sem_t e;
 sem_t sp; // semaforo produtor
@@ -41,7 +37,7 @@ int *consumidos;
 
 int next_free = 0;
 int *next_data; // cada pos iniciada com zero
-int *falta_ler;
+int *falta_ler; // cada pos iniciada com zero
 
 struct sbuffer {
   int numpos;
@@ -167,8 +163,19 @@ void* consumidor (void *arg) {
   return NULL;
 }
 
+
+
 int main (void) {
   int error;
+
+  printf("Digite o numero de espaços na lista:\n");
+  scanf("%d", &N);
+  printf("Digite o numero de produtores:\n");
+  scanf("%d", &P);
+  printf("Digite o numero de consumidores:\n");
+  scanf("%d", &C);
+  printf("Digite o numero de itens:\n");
+  scanf("%d", &I);
 
   pthread_t *produtores;
   produtores = (pthread_t *)calloc(P, sizeof(pthread_t));
@@ -188,14 +195,7 @@ int main (void) {
   sem_init_error = sem_init(&sc, 0, 0);
   if (sem_init_error) { printf("Falha ao iniciar semaforo"); return 1;}
 
-  /* int numpos, numprod, numcons; */
 
-  /* printf("Digite o numero de espaços na lista:\n"); */
-  /* scanf("%d", numpos); */
-  /* printf("Digite o numero de produtores:\n"); */
-  /* scanf("%d", numprod); */
-  /* printf("Digite o numero de consumidores:\n"); */
-  /* scanf("%d", numcons) */
 
   buffer = iniciabuffer(N, P, C);
   next_data = array_vazio(C);
