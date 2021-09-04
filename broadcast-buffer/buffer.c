@@ -26,18 +26,18 @@ int N, P, C, I;
 
 tbuffer *buffer;
 sem_t e;
-sem_t sp; // semaforo produtor
-sem_t sc; // semaforo consumidor
+sem_t sp;
+sem_t sc;
 
-int pb = 0; // produtor bloqueado
-int cb = 0; // consumidor bloqueado
+int pb = 0;
+int cb = 0;
 
 int produzidos = 0;
 int *consumidos;
 
 int next_free = 0;
-int *next_data; // cada pos iniciada com zero
-int *falta_ler; // cada pos iniciada com zero
+int *next_data;
+int *falta_ler;
 
 struct sbuffer {
   int numpos;
@@ -45,20 +45,6 @@ struct sbuffer {
   int numcos;
   int *itens;
 };
-
-void print_buffer(tbuffer* buffer, long thread) {
-  printf("[%lu]", thread);
-  for(int i=0; i<buffer->numpos; i++) {
-    printf("|%d| ", buffer->itens[i]);
-  }
-  printf("\n");
-}
-
-int* array_vazio(int tam) {
-  int *array = (int*)calloc(tam, sizeof(int));
-
-  return array;
-}
 
 tbuffer* iniciabuffer(int numpos, int numprod, int numcos) {
   tbuffer *buffer = calloc(1, sizeof(tbuffer));
@@ -84,6 +70,47 @@ void finalizabuffer(tbuffer* buffer) {
   free(buffer);
 }
 
+void entrada_parametros() {
+  printf("Digite o numero de espaços na lista:\n");
+  scanf("%d", &N);
+  printf("Digite o numero de produtores:\n");
+  scanf("%d", &P);
+  printf("Digite o numero de consumidores:\n");
+  scanf("%d", &C);
+  printf("Digite o numero de itens:\n");
+  scanf("%d", &I);
+}
+
+void print_buffer(tbuffer* buffer, long thread) {
+  printf("[%lu]", thread);
+  for(int i=0; i<buffer->numpos; i++) {
+    printf("|%d| ", buffer->itens[i]);
+  }
+  printf("\n");
+}
+
+void print_produtor_wait_list() {
+  printf("\033[0;33m[%lu][Produtor] WAIT LIST\033[0m\n", (long)pthread_self());
+}
+
+void print_producao(item, produzidos) {
+  printf("\033[0;31m[%lu]Producao: %d. Total: %d\033[0m\n", (long)pthread_self(), item, produzidos);
+}
+
+void print_consumidor_wait_list(meuid) {
+  printf("\033[0;33m[%lu][Consumidor %d] WAIT LIST\033[0m\n", (long)pthread_self(), meuid);
+}
+
+void print_consumo(meuid, item, consumidos) {
+  printf("\033[0;32m[%lu][Consumidor %d] Consumiu: %d. Total: %d\033[0m\n", pthread_self(), meuid, item, consumidos);
+}
+
+int* array_vazio(int tam) {
+  int *array = (int*)calloc(tam, sizeof(int));
+
+  return array;
+}
+
 void sinal(int tam_buffer) {
   if (pb > 0 && falta_ler[next_free] == 0) {
     pb--; sem_post(&sp);
@@ -98,7 +125,9 @@ void deposita(tbuffer* buffer, int item) {
   sem_wait(&e);
 
   if (falta_ler[next_free] > 0) {
-    printf("\033[0;33m[Prod][%lu]WAIT LIST\n\033[0m", (long)pthread_self());
+    /* log */
+    print_produtor_wait_list();
+
     pb++;
     sem_post(&e);
     sem_wait(&sp);
@@ -106,11 +135,11 @@ void deposita(tbuffer* buffer, int item) {
 
   falta_ler[next_free] = buffer->numcos;
 
-  printf("\033[0;31m[%lu]Producao: %d. ", (long)pthread_self(), item);
-
   buffer->itens[next_free] = item;
   produzidos++;
-  printf("Total: %d\n\033[0m", produzidos);
+
+  /* log */
+  print_producao(item, produzidos);
   print_buffer(buffer, (long)pthread_self());
 
   next_free = (next_free + 1) % buffer->numpos;
@@ -122,23 +151,25 @@ int consome(tbuffer* buffer, int meuid) {
 
   // Colocamos while em vez de if devido aos consumidores gulosos, que tentam comer o que ja comeram. Com o while o teste consumidos[meuid] == produzidos acontece novamente travando eles.
   while(falta_ler[next_data[meuid]] == 0 || consumidos[meuid] == produzidos) {
-    printf("\033[0;33m[Cons %d][%lu]WAIT LIST\n\033[0m", meuid, (long)pthread_self());
+    /* log */
+    print_consumidor_wait_list(meuid);
+
     cb++;
     sem_post(&e);
     sem_wait(&sc);
   }
 
   falta_ler[next_data[meuid]]--;
-
-  int data = buffer->itens[next_data[meuid]];
+  int item = buffer->itens[next_data[meuid]];
   consumidos[meuid]++;
-
-
   next_data[meuid] = (next_data[meuid] + 1) % buffer->numpos;
-  printf("\033[0;32m[%lu]Consumidor: %d. Consumiu: %d. Total: %d\n\033[0m", pthread_self(), meuid, data, consumidos[meuid]);
+
+  /* log */
+  print_consumo(meuid, item, consumidos[meuid]);
+
   sinal(buffer->numpos);
 
-  return data;
+  return item;
 }
 
 void* produtor () {
@@ -156,8 +187,6 @@ void* consumidor (void *arg) {
 
   for (int i=0; i<P*I; i++) {
     int item = consome(buffer, *id_consumidor);
-
-    item++;
   }
 
   return NULL;
@@ -167,35 +196,25 @@ void* consumidor (void *arg) {
 
 int main (void) {
   int error;
-
-  printf("Digite o numero de espaços na lista:\n");
-  scanf("%d", &N);
-  printf("Digite o numero de produtores:\n");
-  scanf("%d", &P);
-  printf("Digite o numero de consumidores:\n");
-  scanf("%d", &C);
-  printf("Digite o numero de itens:\n");
-  scanf("%d", &I);
-
   pthread_t *produtores;
-  produtores = (pthread_t *)calloc(P, sizeof(pthread_t));
-
   pthread_t *consumidores;
+
+  entrada_parametros();
+
+  produtores = (pthread_t *)calloc(P, sizeof(pthread_t));
   consumidores = (pthread_t *)calloc(C, sizeof(pthread_t));
 
   // Semaforo e inicializado 'liberado'
-  int sem_init_error = sem_init(&e, 0, 1);
-  if (sem_init_error) { printf("Falha ao iniciar semaforo"); return 1;}
+  error = sem_init(&e, 0, 1);
+  if (error) { printf("Falha ao iniciar semaforo"); return 1;}
 
   // Semaforo sp inicializado 'ocupado'
-  sem_init_error = sem_init(&sp, 0, 0);
-  if (sem_init_error) { printf("Falha ao iniciar semaforo"); return 1;}
+  error = sem_init(&sp, 0, 0);
+  if (error) { printf("Falha ao iniciar semaforo"); return 1;}
 
   // Semaforo sc inicializado 'ocupado'
-  sem_init_error = sem_init(&sc, 0, 0);
-  if (sem_init_error) { printf("Falha ao iniciar semaforo"); return 1;}
-
-
+  error = sem_init(&sc, 0, 0);
+  if (error) { printf("Falha ao iniciar semaforo"); return 1;}
 
   buffer = iniciabuffer(N, P, C);
   next_data = array_vazio(C);
