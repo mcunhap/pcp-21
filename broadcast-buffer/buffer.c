@@ -87,7 +87,7 @@ void finalizabuffer(tbuffer* buffer) {
 void sinal(int tam_buffer) {
   if (pb > 0 && falta_ler[next_free] == 0) {
     pb--; sem_post(&sp);
-  } else if (cb > 0 && falta_ler[(next_free - 1) % tam_buffer] > 0) {
+  } else if (cb > 0 && falta_ler[(next_free - 1 + tam_buffer) % tam_buffer] > 0) {
     cb--; sem_post(&sc);
   } else {
     sem_post(&e);
@@ -98,7 +98,7 @@ void deposita(tbuffer* buffer, int item) {
   sem_wait(&e);
 
   if (falta_ler[next_free] > 0) {
-    printf("[Prod][%lu]WAIT LIST\n", (long)pthread_self());
+    printf("\033[0;33m[Prod][%lu]WAIT LIST\n\033[0m", (long)pthread_self());
     pb++;
     sem_post(&e);
     sem_wait(&sp);
@@ -106,11 +106,11 @@ void deposita(tbuffer* buffer, int item) {
 
   falta_ler[next_free] = buffer->numcos;
 
-  printf("[%lu]Producao: %d. ", (long)pthread_self(), item);
+  printf("\033[0;31m[%lu]Producao: %d. ", (long)pthread_self(), item);
 
   buffer->itens[next_free] = item;
   produzidos++;
-  printf("Total: %d\n", produzidos);
+  printf("Total: %d\n\033[0m", produzidos);
   print_buffer(buffer, (long)pthread_self());
 
   next_free = (next_free + 1) % buffer->numpos;
@@ -122,7 +122,7 @@ int consome(tbuffer* buffer, int meuid) {
 
   // Colocamos while em vez de if devido aos consumidores gulosos, que tentam comer o que ja comeram. Com o while o teste consumidos[meuid] == produzidos acontece novamente travando eles.
   while(falta_ler[next_data[meuid]] == 0 || consumidos[meuid] == produzidos) {
-    printf("[Cons %d][%lu]WAIT LIST\n", meuid, (long)pthread_self());
+    printf("\033[0;33m[Cons %d][%lu]WAIT LIST\n\033[0m", meuid, (long)pthread_self());
     cb++;
     sem_post(&e);
     sem_wait(&sc);
@@ -135,7 +135,7 @@ int consome(tbuffer* buffer, int meuid) {
 
 
   next_data[meuid] = (next_data[meuid] + 1) % buffer->numpos;
-  printf("[%lu]Consumidor: %d. Consumiu: %d. Total: %d\n", pthread_self(), meuid, data, consumidos[meuid]);
+  printf("\033[0;32m[%lu]Consumidor: %d. Consumiu: %d. Total: %d\n\033[0m", pthread_self(), meuid, data, consumidos[meuid]);
   sinal(buffer->numpos);
 
   return data;
@@ -202,8 +202,6 @@ int main (void) {
   consumidos = array_vazio(C);
   falta_ler = array_vazio(N);
 
-  /* printf("tamanho: %d, produtores: %d, consumidores: %d, ", buffer->numpos, buffer->numprod, buffer->numcos); */
-
   for (int i=0; i<P; i++) {
     error = pthread_create(&produtores[i], NULL, &produtor, NULL);
 
@@ -244,5 +242,6 @@ int main (void) {
   }
 
   finalizabuffer(buffer);
+
   return 0;
 }
