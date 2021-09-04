@@ -10,7 +10,7 @@
  *       Revision:  none
  *       Compiler:  gcc
  *
- *         Author:  YOUR NAME (), 
+ *         Author: Matheus
  *   Organization:  
  *
  * =====================================================================================
@@ -19,7 +19,6 @@
 #include <stdio.h>
 #include <pthread.h>
 #include <semaphore.h>
-#include <unistd.h>
 #include "buffer.h"
 
 int N, P, C, I;
@@ -191,8 +190,6 @@ void* consumidor (void *arg) {
 
   return NULL;
 }
-
-
 
 int main (void) {
   int error;
