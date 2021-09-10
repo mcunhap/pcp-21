@@ -1,0 +1,13 @@
+No primeiro algoritmo temos um manager central que distribui a tarefa de somar N numeros. Porem, ele que e o responsavel por somar os numeros que cada tarefa retorna. Nessa abordagem temos um problema de comunicacao, pois o manager so fala com um worker (quem realiza a tarefa) de cada vez e, consequentemente, so consegue somar um numero de cada vez. Para N numeros teremos um tempo de execucao O(n), o que nao e bom para algo que queremos realizar em paralelo.
+
+O segundo algoritmo sugere que a soma nao fique centralizada em um manager, mas que cada tarefa realize sua soma com base na soma de uma tarefa anterior. Apesar de estar distribuindo a tarefa de somar, ainda temos o problema que cada tarefa precisa esperar a execucao da anterior para conseguir realizar a sua. Dessa maneira, se possuimos apenas uma soma o algoritmo tambem nao consegue executar concorrentemente. Para multiplas somas podemos usar o algoritmo de maneira paralela: enquanto uma tarefa calcula sua parte da soma de algum somatorio, entao outra tarefa consegue executar sua parte da soma de outro somatorio.
+
+O terceiro algoritmo sugere a ideia de divide and conquer para realizar a soma. Nessa abordagem dividimos o problema de somar pela metade recursivamente ate nao conseguirmos mais dividir. Podemos pensar que ficamos com uma estrutura de arvore onde cada nivel da arvore temos o dobro de execucoes do nivel acima e a arvore tera tamanho logN, onde N e a quantidade de numeros que queremos somar.
+
+                                           A                         [1,2,3,4]         3+7=10
+                                        /     \ 
+                                       B       C                    [1,2] [3,4]      1+2=3  3+4=7
+                                     /   \   /   \
+                                    D     E F     G               [1] [2] [3] [4]   1=1 2=2 3=3 4=4
+
+Podemos entao realizar a computacao da soma de mesmo nivel de maneira paralela. Entao, no exemplo acima podemos realizar as somas D, E, F e G em paralelo, depois as somas B e C em paralelo, e por fim a soma A. Podemos notar que executando de maneira paralela o tempo de execucao da soma sera no maximo o tamanho da arvore, ou seja, conseguimos reduzir um problema que executava em O(n) para O(logn)
