@@ -1,0 +1,28 @@
+=> Develop an analytic model for the maximum performance possible in a branch-and-bound search algorithm in which tasks poll a central manager for an up-to-date search bound.
+
+Para modelar o problema vamos separa-lo em 4 etapas, como foi estudado no capitulo 2:
+  - Partition
+  - Comunication
+  - Agglomeration
+  - Mapping
+
+* Partition *
+
+Podemos particionar nosso problema de maneira que cada no da arvore gerada pelo branch-and-bound e um tarefa que pode ser realizada separadamente.
+
+obs: dessa maneira vemos que apenas nos no mesmo nivel podem executar em paralelo, o que nao otimiza da melhor maneira o problema
+
+* Comunication *
+
+Precisamos centralizar a informacao do no que possui menor peso para que todos os workers consigam acessar/atualizar essa informacao conforme os nos vao sendo computados.
+
+* Agglomeration *
+
+Na etapa de Partition dizemos que cada no gerado seria uma task, porem esse nivel de glanuralidade e muito alto, o que nao seria uma boa ideia. Podemos resolver esse problema nessa etapa de Agglomeration, criando uma tarefa para cada no ate um certo nivel de profundidade especifico (D). A partir desse nivel trocamos para uma busca em profundidade na arvore. Dessa maneira cada tarefa executara uma busca em profundidade para uma sub-arvore.
+
+* Mapping *
+
+Precisamos manter o controle de execucao de cada tarefa criada. Para isso podemos usar uma estrategia de enfileiramento de tarefas. Teremos entao um manager central que sabera as tarefas existentes realizando o que foi descrito na etapa de Agglomeration. Cada worker pega uma tarefa do manager central quando estiver livre, ate todas as tarefas serem finalizadas.
+
+
+- No final teremos um modelo onde cada tarefa sera executada por um worker, sendo que cada worker pega uma tarefa disponivel do manager central. Nessa abordagem cada sub-arvore (tarefa) tera a responsabilidade de gerenciar o seu no de menor peso para fazer as otimizacoes de execucao (nao teremos otimizacoes entre tarefas, dado que cada uma tera seu no de menor peso).
