@@ -2,14 +2,16 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <math.h>
+#include <unistd.h>
 
-#define NUM_THREADS 2
+#define NUM_THREADS 1
 
 double a, b, middle, tolerance;
 
 struct c {
   double a;
   double b;
+  double area;
 }; typedef struct c calculation_info;
 
 // a base maior - b base menor - h altura
@@ -18,7 +20,13 @@ double trapezoid_area(double a, double b, double h) {
 }
 
 double function(double x) {
-  return x*x + 10*x + 43;
+  /* return x*x + 10*x + 43; */
+  /* return x*x - 100; */
+  /* double res = x != 0 ? fabs(sin(x) / (x)) : 1.0; */
+  /* return res; */
+
+  double res = x != 0 ? sin(x) / (x) : 1.0;
+  return res;
 }
 
 //TODO: get better name
@@ -37,13 +45,17 @@ double calculate_adaptive_quadrature(calculation_info* info) {
   printf("Area calculated: %f\n", (left_trapezoid_area + right_trapezoid_area));
   printf("Area diff: %f\n", fabs(bigger_trapezoid_area - (left_trapezoid_area + right_trapezoid_area)));
 
-  if(fabs(bigger_trapezoid_area - (left_trapezoid_area + right_trapezoid_area)) <= bigger_trapezoid_area*tolerance) {
+  if(fabs(bigger_trapezoid_area - (left_trapezoid_area + right_trapezoid_area)) <= fabs(bigger_trapezoid_area*tolerance)) {
     printf("DEU BOM!\n\n");
     return left_trapezoid_area + right_trapezoid_area;
   }
 
   calculation_info *left_info = (calculation_info*)calloc(1, sizeof(calculation_info));
+  if(!left_info) { pthread_exit(NULL); };
+
   calculation_info *right_info = (calculation_info*)calloc(1, sizeof(calculation_info));
+  if(!right_info) { pthread_exit(NULL); };
+
   left_info->a = info->a;
   left_info->b = middle;
   right_info->a = middle;
@@ -57,31 +69,41 @@ double calculate_adaptive_quadrature(calculation_info* info) {
 
 void* compute_interval(void *arg) {
   calculation_info *info = (calculation_info*)arg;
-  double final_area = calculate_adaptive_quadrature(info);
+  info->area = calculate_adaptive_quadrature(info);
 
-  printf("Final area: %f \n\n\n", final_area);
+  printf("Sub area: %f \n\n\n", info->area);
 
-  return NULL;
+  pthread_exit(NULL);
 }
 
 int main(void) {
   int error;
+  double final_area = 0;
+  calculation_info *c[NUM_THREADS];
   pthread_t *workers = (pthread_t *)calloc(NUM_THREADS, sizeof(pthread_t));
+  if (!workers) { exit(-1); }
 
-  a = 5;
-  b = 10;
+  a = -100;
+  b = 100;
   middle = (a + b) / 2;
-  tolerance = 0.01;
+  tolerance = 0.00001;
+  /* tolerance = 0.05; */
 
   double interval = b - a;
   double space = interval / NUM_THREADS;
+  printf("Space: %f ", space);
+  printf("Interval: %f\n", interval);
 
   for(int i=0; i<NUM_THREADS; i++) {
-    calculation_info *c = (calculation_info*)calloc(1, sizeof(calculation_info));
-    c->a = a + space*i;
-    c->b = middle + space*i;
+    c[i] = (calculation_info*)calloc(1, sizeof(calculation_info));
+    if(!c[i]) { exit(-1); }
+  }
 
-    error = pthread_create(&workers[i], NULL, &compute_interval, (void*)c);
+  for(int i=0; i<NUM_THREADS; i++) {
+    c[i]->a = a + space*i;
+    c[i]->b = c[i]->a + space;
+
+    error = pthread_create(&workers[i], NULL, &compute_interval, (void*)c[i]);
 
     if(error) {
       printf("Falha ao criar a thread com id: %lu\n", (long)workers[i]);
@@ -97,6 +119,12 @@ int main(void) {
       return 1;
     }
   }
+
+  for(int i=0; i<NUM_THREADS; i++) {
+    final_area = final_area + c[i]->area;
+  }
+
+  printf("Final area: %f\n", final_area);
 
   return 0;
 }
