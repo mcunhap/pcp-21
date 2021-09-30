@@ -20,10 +20,10 @@ double area_trapezio(double a, double b, double h) {
 }
 
 double funcao(double x) {
-  return x*x + 10*x + 43;
+  /* return x*x + 10*x + 43; */
   /* return x*x - 100; */
-  /* double res = x != 0 ? fabs(sin(x) / (x)) : 1.0; */
-  /* return res; */
+  double res = x != 0 ? fabs(sin(x) / (x)) : 1.0;
+  return res;
 
   /* double res = x != 0 ? sin(x) / (x) : 1.0; */
   /* return res; */
@@ -90,6 +90,7 @@ int main(void) {
   printf("Espacamento: %f ", espacamento);
   printf("Intervalo: %f\n", intervalo);
 
+  #pragma omp parallel for
   for(int i=0; i<num_threads; i++) {
     info[i] = (info_calculo*)calloc(1, sizeof(info_calculo));
     if(!info[i]) { exit(-1); }
@@ -97,10 +98,7 @@ int main(void) {
     info[i]->a = a + espacamento*i;
     info[i]->b = info[i]->a + espacamento;
     printf("Intervalo: %d, A: %lf, B: %lf\n", i, info[i]->a, info[i]->b);
-  }
 
-  #pragma omp parallel for
-  for(int i=0; i<num_threads; i++) {
     double resultado = calcula_quadratura_adaptativa(info[i]);
 
     #pragma omp critical
