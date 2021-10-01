@@ -14,7 +14,6 @@ struct c {
   double area;
 }; typedef struct c info_calculo;
 
-// a base maior - b base menor - h altura
 double area_trapezio(double a, double b, double h) {
   return (a+b)*h/2;
 }
@@ -46,17 +45,7 @@ double calcula_quadratura_adaptativa(info_calculo* info) {
   double area_trapezio_esquerdo = area_trapezio(funcao(info->a), funcao(meio), meio-info->a);
   double area_trapezio_direito = area_trapezio(funcao(meio), funcao(info->b), info->b-meio);
 
-  printf("A: %lf ", info->a);
-  printf("B: %lf\n", info->b);
-  printf("Area maior: %lf\n", area_trapezio_maior);
-  printf("Area esquerda: %lf\n", area_trapezio_esquerdo);
-  printf("Area direita: %lf\n", area_trapezio_direito);
-  printf("Limite da area: %lf\n", area_trapezio_maior - area_trapezio_maior*tolerancia);
-  printf("Area calculada: %lf\n", (area_trapezio_esquerdo + area_trapezio_direito));
-  printf("Area diff: %f\n", fabs(area_trapezio_maior - (area_trapezio_esquerdo + area_trapezio_direito)));
-
   if(fabs(area_trapezio_maior - (area_trapezio_esquerdo + area_trapezio_direito)) <= fabs(area_trapezio_maior*tolerancia)) {
-    printf("DEU BOM!\n\n");
     return area_trapezio_esquerdo + area_trapezio_direito;
   }
 
@@ -87,8 +76,6 @@ int main(void) {
 
   double intervalo = b - a;
   double espacamento = intervalo / num_threads;
-  printf("Espacamento: %f ", espacamento);
-  printf("Intervalo: %f\n", intervalo);
 
   #pragma omp parallel for
   for(int i=0; i<num_threads; i++) {
@@ -97,7 +84,6 @@ int main(void) {
 
     info[i]->a = a + espacamento*i;
     info[i]->b = info[i]->a + espacamento;
-    printf("Intervalo: %d, A: %lf, B: %lf\n", i, info[i]->a, info[i]->b);
 
     double resultado = calcula_quadratura_adaptativa(info[i]);
 
@@ -105,7 +91,7 @@ int main(void) {
     area_total += resultado;
   }
 
-  printf("Area total: %lf", area_total);
+  printf("Area total: %lf\n", area_total);
 
   return 0;
 }

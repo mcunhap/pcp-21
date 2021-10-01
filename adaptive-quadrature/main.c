@@ -13,7 +13,6 @@ struct c {
   double area;
 }; typedef struct c info_calculo;
 
-// a base maior - b base menor - h altura
 double area_trapezio(double a, double b, double h) {
   return (a+b)*h/2;
 }
@@ -45,17 +44,7 @@ double calcula_quadratura_adaptativa(info_calculo* info) {
   double area_trapezio_esquerdo = area_trapezio(funcao(info->a), funcao(meio), meio-info->a);
   double area_trapezio_direito = area_trapezio(funcao(meio), funcao(info->b), info->b-meio);
 
-  printf("A: %lf ", info->a);
-  printf("B: %lf\n", info->b);
-  printf("Area maior: %lf\n", area_trapezio_maior);
-  printf("Area esquerda: %lf\n", area_trapezio_esquerdo);
-  printf("Area direita: %lf\n", area_trapezio_direito);
-  printf("Limite da area: %lf\n", area_trapezio_maior - area_trapezio_maior*tolerancia);
-  printf("Area calculada: %lf\n", (area_trapezio_esquerdo + area_trapezio_direito));
-  printf("Area diff: %f\n", fabs(area_trapezio_maior - (area_trapezio_esquerdo + area_trapezio_direito)));
-
   if(fabs(area_trapezio_maior - (area_trapezio_esquerdo + area_trapezio_direito)) <= fabs(area_trapezio_maior*tolerancia)) {
-    printf("DEU BOM!\n\n");
     return area_trapezio_esquerdo + area_trapezio_direito;
   }
 
@@ -80,8 +69,6 @@ void* calcula_intervalo(void *arg) {
   info_calculo *info = (info_calculo*)arg;
   info->area = calcula_quadratura_adaptativa(info);
 
-  printf("Sub area: %lf \n\n\n", info->area);
-
   pthread_exit(NULL);
 }
 
@@ -93,16 +80,10 @@ int main(void) {
   if (!workers) { exit(-1); }
 
   entrada_parametros();
-  /* a = -100; */
-  /* b = 100; */
-  /* tolerancia = 0.05; */
-  tolerancia = 0.00001;
   meio = (a + b) / 2;
 
   double intervalo = b - a;
   double espacamento = intervalo / num_threads;
-  printf("Espacamento: %f ", espacamento);
-  printf("Intervalo: %f\n", intervalo);
 
   for(int i=0; i<num_threads; i++) {
     info[i] = (info_calculo*)calloc(1, sizeof(info_calculo));
