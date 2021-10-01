@@ -2,65 +2,106 @@
 #include <stdlib.h>
 #include "fila.h"
 
-struct Fila {
-	int capacidade;
-	float *dados_a;
-  float *dados_b;
-	int primeiro;
-	int ultimo;
-	int nItens; 
+struct elemento {
+  double dados_a;
+  double dados_b;
+  struct elemento *prox;
 };
 
-void CriarFila( struct Fila *f, int c ) { 
-	f->capacidade = c;
-	f->dados_a = (float*) malloc (f->capacidade * sizeof(float));
-	f->dados_b = (float*) malloc (f->capacidade * sizeof(float));
-	f->primeiro = 0;
-	f->ultimo = -1;
-	f->nItens = 0; 
+struct fila {
+	Elemento *primeiro;
+	Elemento *ultimo;
+};
+
+Fila* CriarFila() {
+  Fila *f = (Fila*)calloc(1, sizeof(Fila));
+  if(!f) {
+    printf("Falha ao criar a fila!");
+    exit(-1);
+  }
+
+	f->primeiro = NULL;
+	f->ultimo = NULL;
+
+  return f;
 }
 
 // insere o item do inicio da Fila
-void InsereTarefa(struct Fila *f, int a, int b) {
-	if (f->ultimo == f->capacidade-1) {
-		f->ultimo = -1;
+void InsereTarefa(Fila *f, double a, double b) {
+  Elemento *e = (Elemento*)calloc(1, sizeof(Elemento));
+  if(!e) {
+    printf("Falha ao inserir novo elemento na fila!");
+    exit(-1);
   }
-	f->ultimo++;
-	f->dados_a[f->ultimo] = a;
-	f->dados_b[f->ultimo] = b;
-	f->nItens++;
+
+  e->dados_a = a;
+  e->dados_b = b;
+
+  // Fila nao ta vazia
+  if(f->ultimo != NULL) {
+    f->ultimo->prox = e;
+  } else {
+    f->primeiro = e;
+  }
+
+  f->ultimo = e;
 }
 
 // retira o item do inicio da Fila
-void RetiraTarefa(struct Fila *f, float* result) { 
-  int i = f->primeiro;
-  int temp = i++;
-  result[0] = f->dados_a[temp];
-  result[1] = f->dados_b[temp];
-	if (f->primeiro == f->capacidade) {
-		f->primeiro = 0;
+Elemento *RetiraTarefa(Fila *f) {
+  Elemento *e = (Elemento*)calloc(1, sizeof(Elemento));
+  if(!e) {
+    printf("Falha ao retirar da fila!");
+    exit(-1);
+  }
+
+  Elemento *p;
+
+  // Fila nao vazia
+  if(!Vazia(f)) {
+    e->dados_a = f->primeiro->dados_a;
+    e->dados_b = f->primeiro->dados_b;
+    p = f->primeiro;
+    f->primeiro = f->primeiro->prox;
+
+    if(f->primeiro == NULL) {
+      f->ultimo = NULL;
     }
-	f->nItens--;
+
+    free(p);
+  }
+
+  return e;
 }
 
  // Retorna verdadeiro com a Fila vazia
-int Vazia(struct Fila *f) {
-	return (f->nItens==0);
+int Vazia(Fila *f) {
+	return (f->primeiro == NULL);
 }
 
- // Retorna verdadeiro com a Fila cheia
-int Cheia(struct Fila *f) {
-	return (f->nItens==f->capacidade);
-}
+void ExibeFila(Fila *f) {
+  Elemento *e;
 
-void ExibeFila(struct Fila *f) {
-	int cont, i;
-	for (cont=0, i= f->primeiro; cont < f->nItens; cont++) {
-    int temp = i++;
-		printf("%.2f - %.2f \t",f->dados_a[temp], f->dados_b[temp]);
-		if (i == f->capacidade){
-			i=0;
-    }
-	}
+  if(Vazia(f)) {
+    printf("Fila vazia!\n");
+  }
+
+  e = f->primeiro;
+  while(e != NULL) {
+    printf("A: %lf, B: %lf\n", e->dados_a, e->dados_b);
+    e = e->prox;
+  }
 	printf("\n\n");
+}
+
+void ExibeElemento(Elemento *e) {
+  printf("A: %lf, B: %lf\n", e->dados_a, e->dados_b);
+}
+
+double LeDadoA(Elemento *e) {
+  return e->dados_a;
+}
+
+double LeDadoB(Elemento *e) {
+  return e->dados_b;
 }

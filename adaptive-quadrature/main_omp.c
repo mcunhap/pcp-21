@@ -6,7 +6,7 @@
 #include <omp.h>
 
 int num_threads;
-double a, b, meio, tolerancia;
+double a, b, tolerancia;
 
 struct c {
   double a;

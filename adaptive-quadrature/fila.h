@@ -1,18 +1,27 @@
+typedef struct elemento Elemento;
+
 typedef struct fila Fila;
 
-void CriarFila( struct Fila *f, int c );
+Fila* CriarFila();
 
 // insere o item do inicio da fila
-void InsereTarefa(struct Fila *f, int a, int b);
+void InsereTarefa(Fila *f, double a, double b);
 
 // retira o item do inicio da fila
-void RetiraTarefa(struct Fila *f, float* result);
+Elemento *RetiraTarefa(Fila *f);
 
 // retorna verdadeiro com a fila vazia
-int Vazia(struct Fila *f);
+int Vazia(Fila *f);
 
-// retorna verdadeiro com a fila cheia
-int Cheia(struct Fila *f);
+// printa fila
+void ExibeFila(Fila *f);
 
-// retorna verdadeiro com a fila vazia
-void ExibeFila(struct Fila *f);
+// printa elemento
+void ExibeElemento(Elemento *e);
+
+// le dada a do elemento
+double LeDadoA(Elemento *e);
+
+
+// le dada b do elemento
+double LeDadoB(Elemento *e);
