@@ -7,6 +7,6 @@ COPY fila.h ./
 COPY main_tasks.c ./
 COPY main_omp.c ./
 COPY main.c ./
-RUN gcc -Wall -pthread main.c -o main -lm
+RUN gcc -Wall -pthread main.c -o main_simple -lm
 RUN gcc -Wall -fopenmp main_omp.c -o main_omp -lm
 RUN gcc -Wall -fopenmp -pthread fila.c main_tasks.c -o main_tasks -lm
