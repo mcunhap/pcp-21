@@ -22,6 +22,5 @@ void ExibeElemento(Elemento *e);
 // le dada a do elemento
 double LeDadoA(Elemento *e);
 
-
 // le dada b do elemento
 double LeDadoB(Elemento *e);
