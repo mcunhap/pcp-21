@@ -38,11 +38,13 @@ long long int tempo_execucao_thread_us(double (*funcao)(info_calculo*), info_cal
   long long int inicio_us, fim_us;
 
   gettimeofday(&tempo_inicio, NULL);
-  info->area = funcao(info);
-  gettimeofday(&tempo_fim, NULL);
-
   inicio_us = (tempo_inicio.tv_sec + (tempo_inicio.tv_usec / 1000000.0)) * 1000000;
+
+  info->area = funcao(info);
+
+  gettimeofday(&tempo_fim, NULL);
   fim_us = (tempo_fim.tv_sec + (tempo_fim.tv_usec / 1000000.0)) * 1000000;
+
 
   printf("Resultado: %lf. ", info->area);
 
@@ -107,7 +109,7 @@ double execucao_omp(int num_threads, double a, double b, double tolerancia) {
 
   #pragma omp parallel for
   for(int i=0; i<num_threads; i++) {
-    double tempo_execucao_us;
+    long long int tempo_execucao_us;
 
     info[i] = (info_calculo*)calloc(1, sizeof(info_calculo));
     if(!info[i]) { exit(-1); }
@@ -117,7 +119,7 @@ double execucao_omp(int num_threads, double a, double b, double tolerancia) {
 
     tempo_execucao_us = tempo_execucao_thread_us(calcula_quadratura_adaptativa, info[i]);
 
-    printf("Thread: %d. Tempo: %lld.\n", i, tempo_execucao_us);
+    printf("Thread: %d. Tempo: %lld us.\n", i, tempo_execucao_us);
 
     #pragma omp critical
     area_total += info[i]->area;
