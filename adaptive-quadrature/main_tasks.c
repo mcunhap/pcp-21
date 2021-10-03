@@ -12,6 +12,8 @@ Fila *tarefas;
 sem_t sem_tarefas;
 
 void entrada_parametros() {
+  printf("Digite o numero de threads:\n");
+  scanf("%d", &num_threads);
   printf("Digite o limite inferior (a) do intervalo:\n");
   scanf("%lf", &a);
   printf("Digite o limite superior (b) do intervalo:\n");
@@ -20,20 +22,21 @@ void entrada_parametros() {
   scanf("%lf", &tolerancia);
 }
 
-double tempo_execucao_total_ms(double (*funcao)(int, double, double, double), int num_threads, double a, double b, double tolerancia) {
+long long int tempo_execucao_total_us(double (*funcao)(int, double, double, double), int num_threads, double a, double b, double tolerancia) {
   struct timeval tempo_inicio, tempo_fim;
-  double inicio_ms, fim_ms, resultado;
+  long long int inicio_us, fim_us;
+  double resultado;
 
   gettimeofday(&tempo_inicio, NULL);
-  inicio_ms = (double)tempo_inicio.tv_sec + ((double)tempo_inicio.tv_usec / 1000000.0) * 1000;
+  inicio_us = (tempo_inicio.tv_sec + (tempo_inicio.tv_usec / 1000000.0)) * 1000000;
 
   resultado = funcao(num_threads, a, b, tolerancia);
   gettimeofday(&tempo_fim, NULL);
-  fim_ms = (double)tempo_fim.tv_sec + ((double)tempo_fim.tv_usec / 1000000.0) * 1000;
+  fim_us = (tempo_fim.tv_sec + (tempo_fim.tv_usec / 1000000.0)) * 1000000;
 
   printf("Resultado: %lf. ", resultado);
 
-  return fim_ms - inicio_ms;
+  return fim_us - inicio_us;
 }
 
 double area_trapezio(double a, double b, double h) {
@@ -70,11 +73,11 @@ double execucao_tarefas_omp(int num_threads, double a, double b, double toleranc
   int erro;
   double total = 0;
 
+  omp_set_num_threads(num_threads);
+
   tarefas = CriarFila();
   erro = sem_init(&sem_tarefas, 0, 1);
-  if (erro) { printf("Falha ao iniciar semaforo"); return 1;}
-
-  omp_set_num_threads(num_threads);
+  if (erro) { printf("Falha ao iniciar semaforo"); return 1; }
 
   InsereTarefa(tarefas, a, b);
 
@@ -82,26 +85,25 @@ double execucao_tarefas_omp(int num_threads, double a, double b, double toleranc
     #pragma omp parallel for
     for(int i=0; i<LeTamanho(tarefas); i++) {
       Elemento *e;
+      double resultado;
+
       sem_wait(&sem_tarefas);
       e = RetiraTarefa(tarefas);
       sem_post(&sem_tarefas);
 
+      resultado = calcula_quadratura_adaptativa(e);
+
       #pragma omp critical
-      total += calcula_quadratura_adaptativa(e);
+      total += resultado;
     }
   }
-
 }
 
 int main(void) {
   entrada_parametros();
 
-  printf("1 thread ## \n");
-  printf("Tempo: %lf ms.\n", tempo_execucao_total_ms(execucao_tarefas_omp, 1, a, b, tolerancia));
-  printf("2 thread ## \n");
-  printf("Tempo: %lf ms.\n", tempo_execucao_total_ms(execucao_tarefas_omp, 2, a, b, tolerancia));
-  printf("4 thread ## \n");
-  printf("Tempo: %lf ms.\n", tempo_execucao_total_ms(execucao_tarefas_omp, 4, a, b, tolerancia));
+  printf("%d thread ## \n", num_threads);
+  printf("Tempo: %lld us. \n", tempo_execucao_total_us(execucao_tarefas_omp, num_threads, a, b, tolerancia));
 
   return 0;
 }

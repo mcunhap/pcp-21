@@ -6,6 +6,7 @@
 #include <omp.h>
 #include <sys/time.h>
 
+int num_threads;
 double a, b, tolerancia;
 
 struct c {
@@ -14,47 +15,38 @@ struct c {
   double area;
 }; typedef struct c info_calculo;
 
-double tempo_execucao_total_ms(double (*funcao)(int, double, double, double), int num_threads, double a, double b, double tolerancia) {
+long long int tempo_execucao_total_us(double (*funcao)(int, double, double, double), int num_threads, double a, double b, double tolerancia) {
   struct timeval tempo_inicio, tempo_fim;
-  double inicio_ms, fim_ms, resultado;
+  long long int inicio_us, fim_us;
+  double resultado;
 
   gettimeofday(&tempo_inicio, NULL);
-  inicio_ms = (double)tempo_inicio.tv_sec + ((double)tempo_inicio.tv_usec / 1000000.0) * 1000;
+  inicio_us = (tempo_inicio.tv_sec + (tempo_inicio.tv_usec / 1000000.0)) * 1000000;
 
   resultado = funcao(num_threads, a, b, tolerancia);
 
   gettimeofday(&tempo_fim, NULL);
-  fim_ms = (double)tempo_fim.tv_sec + ((double)tempo_fim.tv_usec / 1000000.0) * 1000;
+  fim_us = (tempo_fim.tv_sec + (tempo_fim.tv_usec / 1000000.0)) * 1000000;
 
   printf("Resultado: %lf. ", resultado);
 
-  return fim_ms - inicio_ms;
+  return fim_us - inicio_us;
 }
 
-double tempo_execucao_thread_ms(double (*funcao)(info_calculo*), info_calculo *info) {
+long long int tempo_execucao_thread_us(double (*funcao)(info_calculo*), info_calculo *info) {
   struct timeval tempo_inicio, tempo_fim;
-  double inicio_ms, fim_ms;
+  long long int inicio_us, fim_us;
 
   gettimeofday(&tempo_inicio, NULL);
   info->area = funcao(info);
   gettimeofday(&tempo_fim, NULL);
 
-  inicio_ms = (double)tempo_inicio.tv_sec + ((double)tempo_inicio.tv_usec / 1000000.0) * 1000;
-  fim_ms = (double)tempo_fim.tv_sec + ((double)tempo_fim.tv_usec / 1000000.0) * 1000;
+  inicio_us = (tempo_inicio.tv_sec + (tempo_inicio.tv_usec / 1000000.0)) * 1000000;
+  fim_us = (tempo_fim.tv_sec + (tempo_fim.tv_usec / 1000000.0)) * 1000000;
 
   printf("Resultado: %lf. ", info->area);
 
-  return fim_ms - inicio_ms;
-}
-
-double tempo_execucao(double (*funcao)(info_calculo*), info_calculo *parametros) {
-  struct timeval tempo_atual, tempo_depois;
-
-  gettimeofday(&tempo_atual, NULL);
-  parametros->area = funcao(parametros);
-  gettimeofday(&tempo_depois, NULL);
-
-  return (double)tempo_depois.tv_sec + tempo_depois.tv_usec / 1000000.0 - (double)tempo_atual.tv_sec + tempo_atual.tv_usec / 1000000.0;
+  return fim_us - inicio_us;
 }
 
 double area_trapezio(double a, double b, double h) {
@@ -67,6 +59,8 @@ double funcao(double x) {
 }
 
 void entrada_parametros() {
+  printf("Digite o numero de threads:\n");
+  scanf("%d", &num_threads);
   printf("Digite o limite inferior (a) do intervalo:\n");
   scanf("%lf", &a);
   printf("Digite o limite superior (b) do intervalo:\n");
@@ -113,7 +107,7 @@ double execucao_omp(int num_threads, double a, double b, double tolerancia) {
 
   #pragma omp parallel for
   for(int i=0; i<num_threads; i++) {
-    double tempo_execucao_ms;
+    double tempo_execucao_us;
 
     info[i] = (info_calculo*)calloc(1, sizeof(info_calculo));
     if(!info[i]) { exit(-1); }
@@ -121,9 +115,9 @@ double execucao_omp(int num_threads, double a, double b, double tolerancia) {
     info[i]->a = a + espacamento*i;
     info[i]->b = info[i]->a + espacamento;
 
-    tempo_execucao_ms = tempo_execucao_thread_ms(calcula_quadratura_adaptativa, info[i]);
+    tempo_execucao_us = tempo_execucao_thread_us(calcula_quadratura_adaptativa, info[i]);
 
-    printf("Thread: %d. Tempo: %lf.\n", i, tempo_execucao_ms);
+    printf("Thread: %d. Tempo: %lld.\n", i, tempo_execucao_us);
 
     #pragma omp critical
     area_total += info[i]->area;
@@ -135,12 +129,8 @@ double execucao_omp(int num_threads, double a, double b, double tolerancia) {
 int main(void) {
   entrada_parametros();
 
-  printf("1 thread ## \n");
-  printf("Tempo: %lf ms.\n", tempo_execucao_total_ms(execucao_omp, 1, a, b, tolerancia));
-  printf("2 thread ## \n");
-  printf("Tempo: %lf ms.\n", tempo_execucao_total_ms(execucao_omp, 2, a, b, tolerancia));
-  printf("4 thread ## \n");
-  printf("Tempo: %lf ms.\n", tempo_execucao_total_ms(execucao_omp, 4, a, b, tolerancia));
+  printf("%d thread ## \n", num_threads);
+  printf("Tempo: %lld us.\n", tempo_execucao_total_us(execucao_omp, num_threads, a, b, tolerancia));
 
   return 0;
 }

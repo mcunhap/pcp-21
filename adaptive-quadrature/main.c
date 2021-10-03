@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <sys/time.h>
 
+int num_threads;
 double a, b, tolerancia;
 
 struct c {
@@ -13,37 +14,38 @@ struct c {
   double area;
 }; typedef struct c info_calculo;
 
-double tempo_execucao_total_ms(double (*funcao)(int, double, double, double), int num_threads, double a, double b, double tolerancia) {
+long long int tempo_execucao_total_us(double (*funcao)(int, double, double, double), int num_threads, double a, double b, double tolerancia) {
   struct timeval tempo_inicio, tempo_fim;
-  double inicio_ms, fim_ms, resultado;
+  long long int inicio_us, fim_us;
+  double resultado;
 
   gettimeofday(&tempo_inicio, NULL);
-  inicio_ms = (double)tempo_inicio.tv_sec + ((double)tempo_inicio.tv_usec / 1000000.0) * 1000;
+  inicio_us = (tempo_inicio.tv_sec + (tempo_inicio.tv_usec / 1000000.0)) * 1000000;
 
   resultado = funcao(num_threads, a, b, tolerancia);
 
   gettimeofday(&tempo_fim, NULL);
-  fim_ms = (double)tempo_fim.tv_sec + ((double)tempo_fim.tv_usec / 1000000.0) * 1000;
+  fim_us = (tempo_fim.tv_sec + (tempo_fim.tv_usec / 1000000.0)) * 1000000;
 
   printf("Resultado: %lf. ", resultado);
 
-  return fim_ms - inicio_ms;
+  return fim_us - inicio_us;
 }
 
-double tempo_execucao_thread_ms(double (*funcao)(info_calculo*), info_calculo *info) {
+long long int tempo_execucao_thread_us(double (*funcao)(info_calculo*), info_calculo *info) {
   struct timeval tempo_inicio, tempo_fim;
-  double inicio_ms, fim_ms;
+  double inicio_us, fim_us;
 
   gettimeofday(&tempo_inicio, NULL);
   info->area = funcao(info);
   gettimeofday(&tempo_fim, NULL);
 
-  inicio_ms = (double)tempo_inicio.tv_sec + ((double)tempo_inicio.tv_usec / 1000000.0) * 1000;
-  fim_ms = (double)tempo_fim.tv_sec + ((double)tempo_fim.tv_usec / 1000000.0) * 1000;
+  inicio_us = (tempo_inicio.tv_sec + (tempo_inicio.tv_usec / 1000000.0)) * 1000000;
+  fim_us = (tempo_fim.tv_sec + (tempo_fim.tv_usec / 1000000.0)) * 1000000;
 
   printf("Resultado: %lf. ", info->area);
 
-  return fim_ms - inicio_ms;
+  return fim_us - inicio_us;
 }
 
 double area_trapezio(double a, double b, double h) {
@@ -56,6 +58,8 @@ double funcao(double x) {
 }
 
 void entrada_parametros() {
+  printf("Digite o numero de threads:\n");
+  scanf("%d", &num_threads);
   printf("Digite o limite inferior (a) do intervalo:\n");
   scanf("%lf", &a);
   printf("Digite o limite superior (b) do intervalo:\n");
@@ -93,24 +97,22 @@ double calcula_quadratura_adaptativa(info_calculo* info) {
 
 void* calcula_intervalo(void *arg) {
   info_calculo *info = (info_calculo*)arg;
-  double tempo_execucao_ms;
+  long long int tempo_execucao_us;
   info->area = calcula_quadratura_adaptativa(info);
-  tempo_execucao_ms = tempo_execucao_thread_ms(&calcula_quadratura_adaptativa, info);
+  tempo_execucao_us = tempo_execucao_thread_us(&calcula_quadratura_adaptativa, info);
 
-  printf("Thread: %lu. Tempo: %lf ms. \n", (long)pthread_self(), tempo_execucao_ms);
+  printf("Thread: %lu. Tempo: %lld us. \n", (long)pthread_self(), tempo_execucao_us);
 
   pthread_exit(NULL);
 }
 
 double execucao_pthread(int num_threads, double a, double b, double tolerancia) {
   int erro;
-  double meio, intervalo, espacamento, area_final = 0.0;
+  double intervalo, espacamento, area_final = 0.0;
   info_calculo *info[num_threads];
 
   pthread_t *workers = (pthread_t *)calloc(num_threads, sizeof(pthread_t));
   if (!workers) { exit(-1); }
-
-  meio = (a + b) / 2;
 
   intervalo = b - a;
   espacamento = intervalo / num_threads;
@@ -149,12 +151,7 @@ double execucao_pthread(int num_threads, double a, double b, double tolerancia) 
 int main(void) {
   entrada_parametros();
 
-  printf("1 thread ## \n");
-  printf("Tempo: %lf ms\n", tempo_execucao_total_ms(execucao_pthread, 1, a, b, tolerancia));
-  printf("2 thread ## \n");
-  printf("Tempo: %lf ms\n", tempo_execucao_total_ms(execucao_pthread, 2, a, b, tolerancia));
-  printf("4 thread ## \n");
-  printf("Tempo: %lf ms\n", tempo_execucao_total_ms(execucao_pthread, 4, a, b, tolerancia));
-
+  printf("%d thread ## \n", num_threads);
+  printf("Tempo: %lld us\n", tempo_execucao_total_us(execucao_pthread, num_threads, a, b, tolerancia));
   return 0;
 }

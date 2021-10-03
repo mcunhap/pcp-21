@@ -5,6 +5,7 @@
 struct elemento {
   double dados_a;
   double dados_b;
+  double area;
   struct elemento *prox;
 };
 
