@@ -18,10 +18,11 @@ double tempo_execucao_total_ms(double (*funcao)(int, double, double, double), in
   double inicio_ms, fim_ms, resultado;
 
   gettimeofday(&tempo_inicio, NULL);
-  resultado = funcao(num_threads, a, b, tolerancia);
-  gettimeofday(&tempo_fim, NULL);
-
   inicio_ms = (double)tempo_inicio.tv_sec + ((double)tempo_inicio.tv_usec / 1000000.0) * 1000;
+
+  resultado = funcao(num_threads, a, b, tolerancia);
+
+  gettimeofday(&tempo_fim, NULL);
   fim_ms = (double)tempo_fim.tv_sec + ((double)tempo_fim.tv_usec / 1000000.0) * 1000;
 
   printf("Resultado: %lf. ", resultado);

@@ -9,8 +9,9 @@ struct elemento {
 };
 
 struct fila {
-	Elemento *primeiro;
-	Elemento *ultimo;
+  Elemento *primeiro;
+  Elemento *ultimo;
+  int tamanho;
 };
 
 Fila* CriarFila() {
@@ -20,8 +21,9 @@ Fila* CriarFila() {
     exit(-1);
   }
 
-	f->primeiro = NULL;
-	f->ultimo = NULL;
+  f->primeiro = NULL;
+  f->ultimo = NULL;
+  f->tamanho = 0;
 
   return f;
 }
@@ -45,6 +47,7 @@ void InsereTarefa(Fila *f, double a, double b) {
   }
 
   f->ultimo = e;
+  f->tamanho++;
 }
 
 // retira o item do inicio da Fila
@@ -67,6 +70,7 @@ Elemento *RetiraTarefa(Fila *f) {
     if(f->primeiro == NULL) {
       f->ultimo = NULL;
     }
+    f->tamanho--;
 
     free(p);
   }
@@ -74,9 +78,9 @@ Elemento *RetiraTarefa(Fila *f) {
   return e;
 }
 
- // Retorna verdadeiro com a Fila vazia
+// Retorna verdadeiro com a Fila vazia
 int Vazia(Fila *f) {
-	return (f->primeiro == NULL);
+  return (f->primeiro == NULL);
 }
 
 void ExibeFila(Fila *f) {
@@ -91,7 +95,11 @@ void ExibeFila(Fila *f) {
     printf("A: %lf, B: %lf\n", e->dados_a, e->dados_b);
     e = e->prox;
   }
-	printf("\n\n");
+  printf("\n\n");
+}
+
+int LeTamanho(Fila *f) {
+  return f->tamanho;
 }
 
 void ExibeElemento(Elemento *e) {

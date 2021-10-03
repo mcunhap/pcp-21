@@ -16,6 +16,9 @@ int Vazia(Fila *f);
 // printa fila
 void ExibeFila(Fila *f);
 
+// le tamanho da fila
+int LeTamanho(Fila *f);
+
 // printa elemento
 void ExibeElemento(Elemento *e);
 
