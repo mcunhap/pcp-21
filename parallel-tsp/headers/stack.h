@@ -25,6 +25,8 @@ void PushCopy(stack* stack_t, tour* tour_t);
 
 tour* Pop(stack* stack_t);
 
+int Empty(stack* stack_t);
+
 tour** GetTours(stack* stack_t);
 
 int GetSize(stack* stack_t);

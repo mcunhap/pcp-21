@@ -42,23 +42,7 @@ int main(void) {
   cost = GetEdgeWeight(graph_t, hometown, hometown);
   AddCity(initial_tour, hometown, cost);
 
-  cost = GetEdgeWeight(graph_t, hometown, 2);
-  AddCity(initial_tour, 2, cost);
-
-  cost = GetEdgeWeight(graph_t, 2, 1);
-  AddCity(initial_tour, 1, cost);
-
-  cost = GetEdgeWeight(graph_t, 1, 4);
-  AddCity(initial_tour, 4, cost);
-
-  cost = GetEdgeWeight(graph_t, 4, 3);
-  AddCity(initial_tour, 3, cost);
-
-  cost = GetEdgeWeight(graph_t, 3, 0);
-  AddCity(initial_tour, 0, cost);
-
-  PrintTourInfo(initial_tour);
-  /* PushCopy(stack_t, initial_tour); */
+  PushCopy(stack_t, initial_tour);
 
   return 0;
 }

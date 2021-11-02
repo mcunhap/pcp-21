@@ -61,7 +61,7 @@ void PushCopy(stack* stack_t, tour* tour_t) {
 }
 
 tour* Pop(stack* stack_t) {
-  if (stack_t->size == 0) {
+  if (Empty(stack_t)) {
     printf("Empty stack!\n");
     return NULL;
   }
@@ -72,6 +72,12 @@ tour* Pop(stack* stack_t) {
   PrintTourInfo(stack_t->tours[stack_t->size]);
 
   return stack_t->tours[stack_t->size];
+}
+
+int Empty(stack* stack_t) {
+  if (stack_t-> size == 0) { return 1; }
+
+  return 0;
 }
 
 tour** GetTours(stack* stack_t) {
