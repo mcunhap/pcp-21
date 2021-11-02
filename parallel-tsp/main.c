@@ -18,18 +18,32 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "headers/tour.h"
+#include "headers/stack.h"
 
 
 int main(void) {
-  int max_cities = 5;
-  tour *tour_t = CreateTour(max_cities);
-  int *tour_cities = GetTourCities(tour_t);
+  int max_cities = 3;
+  tour *tour_t = CreateTour(max_cities + 1);
+  tour *tour_r = CreateTour(max_cities + 1);
+  stack *stack_t = CreateStack(max_cities + 1);
 
-  for (int i=0; i < max_cities; i++) {
-    printf("%d ", tour_cities[i]);
-  }
+  AddCity(tour_t, 5);
+  AddCity(tour_t, 2);
+  AddCity(tour_t, 8);
+  AddCity(tour_t, 2);
+  AddCity(tour_r, 7);
 
-  printf("\n %d, %d", GetTourNumberCities(tour_t), GetTourCost(tour_t));
+  PushCopy(stack_t, tour_t);
+  PushCopy(stack_t, tour_r);
+
+  tour *tour_e = Pop(stack_t);
+  tour_e = Pop(stack_t);
+  tour_e = Pop(stack_t);
+
+  PushCopy(stack_t, tour_t);
+
+  tour_e = Pop(stack_t);
+  tour_e = Pop(stack_t);
 
   return 0;
 }
