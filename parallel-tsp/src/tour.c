@@ -17,7 +17,7 @@
  */
 #include <stdlib.h>
 #include <stdio.h>
-#include "tour.h"
+#include "../headers/tour.h"
 
 struct tour_t {
   int *cities;

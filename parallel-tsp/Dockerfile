@@ -1,8 +1,11 @@
 # syntax=docker/dockerfile:1
 FROM ubuntu:18.04
 RUN apt-get update && \
+    apt-get install make && \
     apt-get -y install gcc
-COPY tour.c ./
-COPY tour.h ./
+ADD headers ./headers
+ADD src ./src
 COPY main.c ./
-RUN gcc -Wall -pthread main.c tour.c -o main
+COPY Makefile ./
+
+RUN make app
