@@ -22,6 +22,9 @@
 #include "headers/graph.h"
 
 int main(void) {
+  float cost;
+  int hometown = 0;
+
   int size = 5;
   float adj_m[5][5] = {
     { 0.0, 3.0, 4.0, 2.0, 7.0 },
@@ -30,36 +33,32 @@ int main(void) {
     { 2.0, 6.0, 5.0, 0.0, 6.0 },
     { 7.0, 3.0, 8.0, 6.0, 0.0 },
   };
-
-  int max_cities = 3;
-  float edge_weight;
-  tour *tour_t = CreateTour(max_cities + 1);
-  tour *tour_r = CreateTour(max_cities + 1);
-  stack *stack_t = CreateStack(max_cities + 1);
   graph *graph_t = CreateGraph(size, adj_m);
 
-  AddCity(tour_t, 5);
-  AddCity(tour_t, 2);
-  AddCity(tour_t, 8);
-  AddCity(tour_t, 2);
-  AddCity(tour_r, 7);
+  int n_cities = 5;
+  stack *stack_t = CreateStack(n_cities + 1);
+  tour *initial_tour = CreateTour(n_cities + 1);
 
-  PushCopy(stack_t, tour_t);
-  PushCopy(stack_t, tour_r);
+  cost = GetEdgeWeight(graph_t, hometown, hometown);
+  AddCity(initial_tour, hometown, cost);
 
-  tour *tour_e = Pop(stack_t);
-  tour_e = Pop(stack_t);
-  tour_e = Pop(stack_t);
+  cost = GetEdgeWeight(graph_t, hometown, 2);
+  AddCity(initial_tour, 2, cost);
 
-  PushCopy(stack_t, tour_t);
+  cost = GetEdgeWeight(graph_t, 2, 1);
+  AddCity(initial_tour, 1, cost);
 
-  tour_e = Pop(stack_t);
-  tour_e = Pop(stack_t);
+  cost = GetEdgeWeight(graph_t, 1, 4);
+  AddCity(initial_tour, 4, cost);
 
-  PrintGraph(graph_t, size);
+  cost = GetEdgeWeight(graph_t, 4, 3);
+  AddCity(initial_tour, 3, cost);
 
-  edge_weight = GetEdgeWeight(graph_t, 0, 3);
-  printf("%.2f\n", edge_weight);
+  cost = GetEdgeWeight(graph_t, 3, 0);
+  AddCity(initial_tour, 0, cost);
+
+  PrintTourInfo(initial_tour);
+  /* PushCopy(stack_t, initial_tour); */
 
   return 0;
 }

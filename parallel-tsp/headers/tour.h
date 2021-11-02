@@ -19,7 +19,7 @@ typedef struct tour_t tour;
 
 tour* CreateTour();
 
-void AddCity(tour* tour_t, int city);
+void AddCity(tour* tour_t, int city, float cost);
 
 int* GetTourCities(tour* tour_t);
 

@@ -49,7 +49,7 @@ tour* CreateTour(int max_cities) {
   return tour_t;
 }
 
-void AddCity(tour* tour_t, int city) {
+void AddCity(tour* tour_t, int city, float cost) {
   if (tour_t->n_cities == tour_t->max_cities) {
     printf("Tour full!\n");
     return;
@@ -57,7 +57,7 @@ void AddCity(tour* tour_t, int city) {
 
   tour_t->cities[tour_t->n_cities] = city;
   tour_t->n_cities++;
-  tour_t->cost += city;
+  tour_t->cost += cost;
 }
 
 int* GetTourCities(tour* tour_t) {
