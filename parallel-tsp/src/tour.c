@@ -50,6 +50,11 @@ tour* CreateTour(int max_cities) {
   return tour_t;
 }
 
+void FreeTour(tour* tour_t) {
+  free(tour_t->cities);
+  free(tour_t);
+}
+
 void AddCity(tour* tour_t, int city, float cost) {
   if (tour_t->n_cities == tour_t->max_cities) {
     printf("Tour full!\n");
@@ -82,7 +87,8 @@ int TourContainCity(tour* tour_t, int city) {
 }
 
 int BestTour(tour* tour_t, tour* best) {
-  if(best == NULL) { return 1; }
+  // initial case, when best empty
+  if(best->n_cities == 0) { return 1; }
   if(tour_t->cost < best->cost) { return  1; }
 
   return 0;

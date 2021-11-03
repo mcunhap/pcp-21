@@ -21,6 +21,8 @@ typedef struct stack_t stack;
 
 stack* CreateStack(int max_cities);
 
+void FreeStack(stack* stack_t);
+
 void PushCopy(stack* stack_t, tour* tour_t);
 
 tour* Pop(stack* stack_t);

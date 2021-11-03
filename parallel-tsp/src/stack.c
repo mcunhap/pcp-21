@@ -41,6 +41,14 @@ stack* CreateStack(int max_cities) {
   return stack_t;
 }
 
+void FreeStack(stack* stack_t) {
+  for(int i=0; i< stack_t->size; i++) {
+    free(stack_t->tours[i]);
+  }
+
+  free(stack_t->tours);
+}
+
 void PushCopy(stack* stack_t, tour* tour_t) {
   if (stack_t->size == stack_t->max_size) {
     printf("Stack full!\n");

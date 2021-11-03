@@ -26,6 +26,14 @@ struct graph_t {
   float** adjency_matrix;
 };
 
+void FreeGraph(graph* graph_t) {
+  for(int i=0; i< graph_t->n_nodes; i++) {
+    free(graph_t->adjency_matrix[i]);
+  }
+  free(graph_t->adjency_matrix);
+  free(graph_t->nodes);
+}
+
 graph* CreateGraph(int size, int nodes[size], float adjency_matrix[size][size]) {
   graph *graph_t = (graph*) calloc (1, sizeof(graph));
 

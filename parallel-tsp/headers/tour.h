@@ -19,6 +19,8 @@ typedef struct tour_t tour;
 
 tour* CreateTour();
 
+void FreeTour();
+
 void AddCity(tour* tour_t, int city, float cost);
 
 int LastCity(tour* tour_t);
