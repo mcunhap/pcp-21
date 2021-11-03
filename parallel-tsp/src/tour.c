@@ -42,6 +42,7 @@ tour* CreateTour(int max_cities) {
     exit(-1);
   }
 
+  for(int i=0; i < max_cities; i++) { tour_t->cities[i] = -1; };
   tour_t->max_cities = max_cities;
   tour_t->n_cities = 0;
   tour_t->cost = 0;
@@ -58,6 +59,33 @@ void AddCity(tour* tour_t, int city, float cost) {
   tour_t->cities[tour_t->n_cities] = city;
   tour_t->n_cities++;
   tour_t->cost += cost;
+}
+
+int LastCity(tour* tour_t) {
+  return tour_t->cities[tour_t->n_cities-1];
+}
+
+void RemoveLastCity(tour* tour_t, int cost) {
+  tour_t->cities[tour_t->n_cities] = -1;
+  tour_t->n_cities--;
+  tour_t->cost -= cost;
+}
+
+int TourContainCity(tour* tour_t, int city) {
+  // not include hometown in this verification
+  for(int i=1; i < tour_t->n_cities; i++) {
+
+    if(tour_t->cities[i] == city) { return 1; }
+  }
+
+  return 0;
+}
+
+int BestTour(tour* tour_t, tour* best) {
+  if(best == NULL) { return 1; }
+  if(tour_t->cost < best->cost) { return  1; }
+
+  return 0;
 }
 
 int* GetTourCities(tour* tour_t) {

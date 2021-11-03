@@ -56,8 +56,8 @@ void PushCopy(stack* stack_t, tour* tour_t) {
   stack_t->tours[loc] = tour_tmp;
   stack_t->size++;
 
-  printf("Pushed tour\n");
-  PrintTourInfo(tour_tmp);
+  /* printf("Pushed tour\n"); */
+  /* PrintTourInfo(tour_tmp); */
 }
 
 tour* Pop(stack* stack_t) {
@@ -68,8 +68,8 @@ tour* Pop(stack* stack_t) {
 
   stack_t->size--;
 
-  printf("Poped tour\n");
-  PrintTourInfo(stack_t->tours[stack_t->size]);
+  /* printf("Poped tour\n"); */
+  /* PrintTourInfo(stack_t->tours[stack_t->size]); */
 
   return stack_t->tours[stack_t->size];
 }
