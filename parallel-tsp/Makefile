@@ -12,7 +12,7 @@ PROJECT := Parallel TSP
 CFLAGS = -Wall
 
 ## Object files
-_OBJ_FILES = tour.o stack.o graph.o
+_OBJ_FILES = tour.o stack.o graph.o tsp.o
 OBJ_FILES = $(_OBJ_FILES:%.o=./src/obj/%.o)
 
 ## Build imagem Docker
@@ -35,11 +35,16 @@ stack: ./src/stack.c ./headers/stack.h
 graph: ./src/graph.c ./headers/graph.h
 	gcc $(CFLAGS) -c $< -o ./src/obj/$@.o
 
+## Make tsp dependency
+tsp: ./src/tsp.c ./headers/tsp.h
+	gcc $(CFLAGS) -c $< -o ./src/obj/$@.o
+
 ## Make project dependencies
 dependencies:
 	make tour
 	make stack
 	make graph
+	make tsp
 
 ## Make entire app
 app:

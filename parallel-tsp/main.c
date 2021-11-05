@@ -20,9 +20,12 @@
 #include "headers/tour.h"
 #include "headers/stack.h"
 #include "headers/graph.h"
+#include "headers/tsp.h"
+
+//Global for all threads
+tour* best_tour;
 
 int main(void) {
-  float cost;
   int hometown = 0;
 
   int size = 5;
@@ -64,36 +67,12 @@ int main(void) {
 
   stack *stack_t = CreateStack(stack_size);
   tour *initial_tour = CreateTour(n_cities + 1);
-  tour *best_tour = CreateTour(n_cities + 1);
-  tour *current_tour;
+  best_tour = CreateTour(n_cities + 1);
 
   AddCity(initial_tour, graph_t, hometown);
-
   PushCopy(stack_t, initial_tour);
 
-  while(!Empty(stack_t)) {
-    current_tour = Pop(stack_t);
-
-    if(GetTourNumberCities(current_tour) == n_cities) {
-      // add hometown to current tour to compute the final cost
-      AddCity(current_tour, graph_t, hometown);
-
-      if(BestTour(current_tour, best_tour)) {
-        printf("Update best tour!\n");
-        PrintTourInfo(current_tour);
-        CopyTour(best_tour, current_tour);
-      }
-    } else {
-      for (int nbr=n_cities-1; nbr >= 1; nbr--) {
-        if(!TourContainCity(current_tour, nbr)) {
-          AddCity(current_tour, graph_t, nbr);
-          PushCopy(stack_t, current_tour);
-          RemoveLastCity(current_tour, graph_t);
-        }
-      }
-    }
-    FreeTour(current_tour);
-  }
+  EvaluateTours(stack_t, graph_t, best_tour, n_cities, hometown);
 
   printf("BEST TOUR: \n");
   PrintTourInfo(best_tour);
