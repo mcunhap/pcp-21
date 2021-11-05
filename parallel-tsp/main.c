@@ -67,8 +67,7 @@ int main(void) {
   tour *best_tour = CreateTour(n_cities + 1);
   tour *current_tour;
 
-  cost = GetEdgeWeight(graph_t, hometown, hometown);
-  AddCity(initial_tour, hometown, cost);
+  AddCity(initial_tour, graph_t, hometown);
 
   PushCopy(stack_t, initial_tour);
 
@@ -77,8 +76,7 @@ int main(void) {
 
     if(GetTourNumberCities(current_tour) == n_cities) {
       // add hometown to current tour to compute the final cost
-      cost = GetEdgeWeight(graph_t, LastCity(current_tour), hometown);
-      AddCity(current_tour, hometown, cost);
+      AddCity(current_tour, graph_t, hometown);
 
       if(BestTour(current_tour, best_tour)) {
         printf("Update best tour!\n");
@@ -88,10 +86,9 @@ int main(void) {
     } else {
       for (int nbr=n_cities-1; nbr >= 1; nbr--) {
         if(!TourContainCity(current_tour, nbr)) {
-          cost = GetEdgeWeight(graph_t, LastCity(current_tour), nbr);
-          AddCity(current_tour, nbr, cost);
+          AddCity(current_tour, graph_t, nbr);
           PushCopy(stack_t, current_tour);
-          RemoveLastCity(current_tour, cost);
+          RemoveLastCity(current_tour, graph_t);
         }
       }
     }

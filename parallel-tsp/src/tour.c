@@ -23,7 +23,7 @@ struct tour_t {
   int *cities;
   int max_cities;
   int n_cities;
-  int cost;
+  float cost;
 };
 
 
@@ -55,7 +55,9 @@ void FreeTour(tour* tour_t) {
   free(tour_t);
 }
 
-void AddCity(tour* tour_t, int city, float cost) {
+void AddCity(tour* tour_t, graph* graph_t, int city) {
+  int last_city = tour_t->cities[tour_t->n_cities - 1];
+
   if (tour_t->n_cities == tour_t->max_cities) {
     printf("Tour full!\n");
     return;
@@ -63,14 +65,14 @@ void AddCity(tour* tour_t, int city, float cost) {
 
   tour_t->cities[tour_t->n_cities] = city;
   tour_t->n_cities++;
-  tour_t->cost += cost;
+  tour_t->cost += GetEdgeWeight(graph_t, last_city, city);
 }
 
-int LastCity(tour* tour_t) {
-  return tour_t->cities[tour_t->n_cities-1];
-}
+void RemoveLastCity(tour* tour_t, graph* graph_t) {
+  int last_city = tour_t->cities[tour_t->n_cities - 1];
+  int before_last_city = tour_t->cities[tour_t->n_cities - 2];
+  float cost = GetEdgeWeight(graph_t, before_last_city, last_city);
 
-void RemoveLastCity(tour* tour_t, int cost) {
   tour_t->cities[tour_t->n_cities] = -1;
   tour_t->n_cities--;
   tour_t->cost -= cost;
@@ -126,5 +128,5 @@ void PrintTourInfo(tour* tour_t) {
     printf("%d ", tour_t->cities[i]);
   }
 
-  printf("\nNCITIES: %d\nCOST: %d\n\n", tour_t->n_cities, tour_t->cost);
+  printf("\nNCITIES: %d\nCOST: %.2f\n\n", tour_t->n_cities, tour_t->cost);
 }

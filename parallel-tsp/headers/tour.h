@@ -15,17 +15,17 @@
  *
  * =====================================================================================
  */
+#include "../headers/graph.h"
+
 typedef struct tour_t tour;
 
 tour* CreateTour();
 
 void FreeTour();
 
-void AddCity(tour* tour_t, int city, float cost);
+void AddCity(tour* tour_t, graph* graph_t, int city);
 
-int LastCity(tour* tour_t);
-
-void RemoveLastCity(tour* tour_t, int cost);
+void RemoveLastCity(tour* tour_t, graph* graph_t);
 
 int TourContainCity(tour* tour_t, int city);
 
