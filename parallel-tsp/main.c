@@ -22,12 +22,12 @@
 #include "headers/graph.h"
 #include "headers/tsp.h"
 
+#define HOMETOWN 0
+
 //Global for all threads
 tour* best_tour;
 
 int main(void) {
-  int hometown = 0;
-
   int size = 5;
   int nodes[] = { 0,1,2,3,4 };
   float adj_m[5][5] = {
@@ -69,10 +69,10 @@ int main(void) {
   tour *initial_tour = CreateTour(n_cities + 1);
   best_tour = CreateTour(n_cities + 1);
 
-  AddCity(initial_tour, graph_t, hometown);
+  AddCity(initial_tour, graph_t, HOMETOWN);
   PushCopy(stack_t, initial_tour);
 
-  EvaluateTours(stack_t, graph_t, best_tour, n_cities, hometown);
+  EvaluateTours(stack_t, graph_t, best_tour, n_cities, HOMETOWN);
 
   printf("BEST TOUR: \n");
   PrintTourInfo(best_tour);

@@ -35,7 +35,10 @@ void EvaluateTours(stack* stack_t, graph* graph_t, tour* best_tour, int n_cities
         CopyTour(best_tour, current_tour);
       }
     } else {
-      for (int nbr=n_cities-1; nbr >= 1; nbr--) {
+      for (int nbr=n_cities-1; nbr >= 0; nbr--) {
+        // dont go back to hometown, with this we can set hometown to any city
+        if (nbr == hometown) { continue; }
+
         if(!TourContainCity(current_tour, nbr)) {
           AddCity(current_tour, graph_t, nbr);
           PushCopy(stack_t, current_tour);
