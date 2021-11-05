@@ -20,7 +20,7 @@
 #include "../headers/tour.h"
 
 struct tour_t {
-  int *cities;
+  int* cities;
   int max_cities;
   int n_cities;
   float cost;
@@ -28,7 +28,7 @@ struct tour_t {
 
 
 tour* CreateTour(int max_cities) {
-  tour *tour_t = (tour*) calloc (1, sizeof(tour));
+  tour* tour_t = (tour*) calloc (1, sizeof(tour));
 
   if(!tour_t) {
     printf("Failed to create tour.\n");

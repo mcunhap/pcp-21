@@ -27,7 +27,7 @@ struct stack_t {
 };
 
 stack* CreateStack(int max_cities) {
-  stack *stack_t = (stack*) calloc (1, sizeof(stack));
+  stack* stack_t = (stack*) calloc (1, sizeof(stack));
 
   if(!stack_t) {
     printf("Failed to create stack.\n");
@@ -63,9 +63,6 @@ void PushCopy(stack* stack_t, tour* tour_t) {
 
   stack_t->tours[loc] = tour_tmp;
   stack_t->size++;
-
-  /* printf("Pushed tour\n"); */
-  /* PrintTourInfo(tour_tmp); */
 }
 
 tour* Pop(stack* stack_t) {
@@ -75,9 +72,6 @@ tour* Pop(stack* stack_t) {
   }
 
   stack_t->size--;
-
-  /* printf("Poped tour\n"); */
-  /* PrintTourInfo(stack_t->tours[stack_t->size]); */
 
   return stack_t->tours[stack_t->size];
 }

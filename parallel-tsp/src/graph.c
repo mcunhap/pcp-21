@@ -19,56 +19,32 @@
 #include <stdio.h>
 #include "../headers/graph.h"
 
-
 struct graph_t {
-  int *nodes;
+  int* nodes;
   int n_nodes;
   float** adjency_matrix;
 };
 
-void FreeGraph(graph* graph_t) {
-  for(int i=0; i< graph_t->n_nodes; i++) {
-    free(graph_t->adjency_matrix[i]);
-  }
-  free(graph_t->adjency_matrix);
-  free(graph_t->nodes);
-}
-
 graph* CreateGraph(int size, int nodes[size], float adjency_matrix[size][size]) {
-  graph *graph_t = (graph*) calloc (1, sizeof(graph));
+  graph* graph_t = (graph*) calloc (1, sizeof(graph));
 
-  if(!graph_t) {
-    printf("Failed to create graph.\n");
-    exit(-1);
-  }
+  if(!graph_t) { printf("Failed to create graph.\n"); exit(-1); }
 
   graph_t->n_nodes = size;
 
   graph_t->nodes = (int*) calloc (size, sizeof(int));
-
-  if(!graph_t->nodes) {
-    printf("Failed to create nodes for a graph.\n");
-    exit(-1);
-  }
+  if(!graph_t->nodes) { printf("Failed to create nodes for a graph.\n"); exit(-1); }
 
   for(int i=0; i < size; i++) {
     graph_t->nodes[i] = nodes[i];
   }
 
   graph_t->adjency_matrix = (float**) calloc (size, sizeof(float*));
-
-  if(!graph_t->adjency_matrix) {
-    printf("Failed to create an adjency matrix rows for a graph.\n");
-    exit(-1);
-  }
+  if(!graph_t->adjency_matrix) { printf("Failed to create an adjency matrix rows for a graph.\n"); exit(-1); }
 
   for(int i=0; i < size; i++) {
     graph_t->adjency_matrix[i] = (float*) calloc (size, sizeof(float));
-
-    if(!graph_t->adjency_matrix[i]) {
-      printf("Failed to create an adjency matrix columns for a graph.\n");
-      exit(-1);
-    }
+    if(!graph_t->adjency_matrix[i]) { printf("Failed to create an adjency matrix columns for a graph.\n"); exit(-1); }
   }
 
   for(int i=0; i < size; i++) {
@@ -78,6 +54,14 @@ graph* CreateGraph(int size, int nodes[size], float adjency_matrix[size][size]) 
   }
 
   return graph_t;
+}
+
+void FreeGraph(graph* graph_t) {
+  for(int i=0; i< graph_t->n_nodes; i++) {
+    free(graph_t->adjency_matrix[i]);
+  }
+  free(graph_t->adjency_matrix);
+  free(graph_t->nodes);
 }
 
 float GetEdgeWeight(graph* graph_t, int i, int j) {
