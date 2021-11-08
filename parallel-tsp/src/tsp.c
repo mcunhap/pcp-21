@@ -46,7 +46,9 @@ int Termination(stack* my_stack, term* term_t, int num_threads) {
     pthread_mutex_lock(&term_t->term_mutex);
 
     if(term_t->threads_in_cond_wait > 0 && term_t->new_stack == NULL) {
-      /* Split my stack creating new_stack; */
+      printf("splitting stack...\n");
+      term_t->new_stack = SplitStack(my_stack);
+
       pthread_cond_signal(&term_t->term_cond_var);
     }
 
@@ -61,6 +63,7 @@ int Termination(stack* my_stack, term* term_t, int num_threads) {
     if(term_t->threads_in_cond_wait == num_threads - 1) {
       // last thread running
       term_t->threads_in_cond_wait++;
+      printf("threads in wait: %d\n", term_t->threads_in_cond_wait);
       pthread_cond_broadcast(&term_t->term_cond_var);
 
       pthread_mutex_unlock(&term_t->term_mutex);
@@ -68,10 +71,12 @@ int Termination(stack* my_stack, term* term_t, int num_threads) {
       return 1;
     } else {
       // other threads stil working... wait for work
+      term_t->threads_in_cond_wait++;
       while(pthread_cond_wait(&term_t->term_cond_var, &term_t->term_mutex) != 0);
 
       if(term_t->threads_in_cond_wait < num_threads) {
-        my_stack = term_t->new_stack;
+        CopyStack(term_t->new_stack, my_stack);
+
         term_t->new_stack = NULL;
         term_t->threads_in_cond_wait--;
 
@@ -79,6 +84,7 @@ int Termination(stack* my_stack, term* term_t, int num_threads) {
 
         return 0;
       } else {
+        printf("all threads done!\n");
         pthread_mutex_unlock(&term_t->term_mutex);
 
         return 1;
@@ -87,11 +93,10 @@ int Termination(stack* my_stack, term* term_t, int num_threads) {
   }
 }
 
-void EvaluateTours(stack* stack_t, graph* graph_t, tour* best_tour, pthread_mutex_t evaluate_mutex, term* term_t, int n_cities, int hometown) {
+void EvaluateTours(stack* stack_t, graph* graph_t, tour* best_tour, pthread_mutex_t evaluate_mutex, term* term_t, int n_cities, int hometown, int num_threads) {
   tour* current_tour;
 
-  /* while(Termination(stack_t, term_t, num_threads)) { */
-  while(!Empty(stack_t)) {
+  while(!Termination(stack_t, term_t, num_threads)) {
     current_tour = Pop(stack_t);
 
     if(GetTourNumberCities(current_tour) == n_cities) {

@@ -76,8 +76,43 @@ tour* Pop(stack* stack_t) {
   return stack_t->tours[stack_t->size];
 }
 
+stack* SplitStack(stack* src_stack) {
+  stack* new_stack = CreateStack(src_stack->max_size/2);
+  stack* aux_stack = CreateStack(src_stack->max_size/2);
+
+  for(int i=0; i < src_stack->size; i++) {
+    if(i % 2 == 0) {
+      PushCopy(new_stack, src_stack->tours[i]);
+    } else {
+      PushCopy(aux_stack, src_stack->tours[i]);
+    }
+  }
+
+  src_stack = aux_stack;
+
+  return new_stack;
+}
+
+void CopyStack(stack* orig, stack* dest) {
+  tour* tour_t;
+  int stack_max_size = orig->max_size;
+  stack* aux = CreateStack(stack_max_size);
+
+  while(!Empty(orig)) {
+    tour_t = Pop(orig);
+    PushCopy(aux, tour_t);
+  }
+
+  while(!Empty(aux)) {
+    tour_t = Pop(aux);
+    PushCopy(dest, tour_t);
+  }
+
+  FreeStack(aux);
+}
+
 int Empty(stack* stack_t) {
-  if (stack_t-> size == 0) { return 1; }
+  if (stack_t->size == 0) { return 1; }
 
   return 0;
 }
@@ -92,8 +127,7 @@ int GetSize(stack* stack_t) {
 
 // Just for debugging
 void PrintStackInfo(stack* stack_t) {
-  for(int i=0; i < GetSize(stack_t); i++) {
-    PrintTourInfo(GetLastTour(stack_t));
+  for(int i=GetSize(stack_t) - 1; i >= 0; i--) {
+    PrintTourInfo(stack_t->tours[i]);
   }
-  printf("\n");
 }

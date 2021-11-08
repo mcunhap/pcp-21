@@ -27,6 +27,10 @@ void PushCopy(stack* stack_t, tour* tour_t);
 
 tour* Pop(stack* stack_t);
 
+stack* SplitStack(stack* src_stack);
+
+void CopyStack(stack* orig, stack* dest);
+
 int Empty(stack* stack_t);
 
 tour* GetLastTour(stack* stack_t);
