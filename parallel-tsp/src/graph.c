@@ -68,6 +68,10 @@ float GetEdgeWeight(graph* graph_t, int i, int j) {
   return graph_t->adjency_matrix[i][j];
 }
 
+int NumNodes(graph* graph_t) {
+  return graph_t->n_nodes;
+}
+
 // Just for debugging
 void PrintGraph(graph* graph_t) {
   printf("Nodes: \n");

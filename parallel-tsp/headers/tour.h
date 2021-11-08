@@ -31,7 +31,7 @@ int TourContainCity(tour* tour_t, int city);
 
 int BestTour(tour* tour_t, tour* best);
 
-int* GetTourCities(tour* tour_t);
+int GetTourLastCity(tour* tour_t);
 
 int GetTourMaxCities(tour* tour_t);
 

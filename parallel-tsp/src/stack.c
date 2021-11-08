@@ -82,10 +82,18 @@ int Empty(stack* stack_t) {
   return 0;
 }
 
-tour** GetTours(stack* stack_t) {
-  return stack_t->tours;
+tour* GetLastTour(stack* stack_t) {
+  return stack_t->tours[stack_t->size - 1];
 }
 
 int GetSize(stack* stack_t) {
   return stack_t->size;
+}
+
+// Just for debugging
+void PrintStackInfo(stack* stack_t) {
+  for(int i=0; i < GetSize(stack_t); i++) {
+    PrintTourInfo(GetLastTour(stack_t));
+  }
+  printf("\n");
 }

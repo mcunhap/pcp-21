@@ -29,7 +29,9 @@ tour* Pop(stack* stack_t);
 
 int Empty(stack* stack_t);
 
-tour** GetTours(stack* stack_t);
+tour* GetLastTour(stack* stack_t);
 
 int GetSize(stack* stack_t);
 
+// Just for debugging
+void PrintStackInfo(stack* stack_t);

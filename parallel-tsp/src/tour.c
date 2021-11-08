@@ -1,4 +1,5 @@
 /*
+ *
  * =====================================================================================
  *
  *       Filename:  tour.c
@@ -96,8 +97,8 @@ int BestTour(tour* tour_t, tour* best) {
   return 0;
 }
 
-int* GetTourCities(tour* tour_t) {
-  return tour_t->cities;
+int GetTourLastCity(tour* tour_t) {
+  return tour_t->cities[tour_t->n_cities - 1];
 }
 
 int GetTourMaxCities(tour* tour_t) {
