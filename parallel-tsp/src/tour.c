@@ -31,17 +31,11 @@ struct tour_t {
 tour* CreateTour(int max_cities) {
   tour* tour_t = (tour*) calloc (1, sizeof(tour));
 
-  if(!tour_t) {
-    printf("Failed to create tour.\n");
-    exit(-1);
-  }
+  if(!tour_t) { printf("Failed to create tour.\n"); exit(-1); }
 
   tour_t->cities = (int*) calloc (max_cities, sizeof(int));
 
-  if(!tour_t->cities) {
-    printf("Failed to create cities array.\n");
-    exit(-1);
-  }
+  if(!tour_t->cities) { printf("Failed to create cities array.\n"); exit(-1); }
 
   for(int i=0; i < max_cities; i++) { tour_t->cities[i] = -1; };
   tour_t->max_cities = max_cities;
