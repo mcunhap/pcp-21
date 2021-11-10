@@ -51,6 +51,10 @@ app:
 	make dependencies
 	gcc $(CFLAGS) -pthread -o main main.c $(OBJ_FILES)
 
+##MPI Test
+mpitest:
+	mpicc -o mpi_test mpi_test.c
+
 ## Commands
 help:
 	printf "\n${COLOR_YELLOW}${PROJECT}\n--------------------\n${COLOR_RESET}"
