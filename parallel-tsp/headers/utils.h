@@ -1,12 +1,12 @@
 /*
  * =====================================================================================
  *
- *       Filename:  graph.h
+ *       Filename:  utils.h
  *
  *    Description:  
  *
  *        Version:  1.0
- *        Created:  02/11/2021 16:59:18
+ *        Created:  10/11/2021 21:40:57
  *       Revision:  none
  *       Compiler:  gcc
  *
@@ -15,15 +15,7 @@
  *
  * =====================================================================================
  */
-typedef struct graph_t graph;
 
-graph* CreateGraph(int size, int nodes[size], float** adjency_matrix);
+void ReadNCities(int* n_cities);
 
-void FreeGraph(graph* graph_t);
-
-float GetEdgeWeight(graph* graph_t, int i, int j);
-
-int NumNodes(graph* graph_t);
-
-// Just for debugging
-void PrintGraph(graph *graph_t);
+int ReadInstance(int n_cities, char* filename, float** m);

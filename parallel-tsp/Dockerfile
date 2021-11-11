@@ -5,6 +5,7 @@ RUN apt-get update && \
     apt-get -y install gcc
 ADD headers ./headers
 ADD src ./src
+ADD instances ./instances
 COPY main.c ./
 COPY Makefile ./
 

@@ -147,7 +147,7 @@ void InitializeStacks(int root_node, int n_stacks, int stack_size, stack* stacks
   }
 }
 
-void FillStacks(int num_threads, int root_node, int stack_size, graph* graph_t, stack* stacks[num_threads]) {
+void FillStacks(int root_node, int num_threads, int stack_size, stack* stacks[num_threads], graph* graph_t) {
   float nbr_cost;
   int num_nodes = NumNodes(graph_t);
   int visited_nodes[num_nodes], current_node;

@@ -42,8 +42,8 @@ int main(int argc, char** argv) {
 
   MPI_Bcast(&n_cities, 1, MPI_INT, 0, MPI_COMM_WORLD);
   MPI_Bcast(&nodes, n_cities, MPI_INT, 0, MPI_COMM_WORLD);
-  for(int i=0; i < n_cities; i++)
-    MPI_Bcast(adj_m[i], n_cities, MPI_FLOAT, 0, MPI_COMM_WORLD);
+  /* for(int i=0; i < n_cities; i++) */
+  /*   MPI_Bcast(adj_m[i], n_cities, MPI_FLOAT, 0, MPI_COMM_WORLD); */
 
   /* printf("Rank: %d, n_cities: %d, nodes: ", world_rank, n_cities); */
   /* for(int i=0; i < n_cities; i++) { */
@@ -51,12 +51,12 @@ int main(int argc, char** argv) {
   /* } */
   /* printf("\n"); */
 
-  /* for(int i=0; i < n_cities; i++) { */
-  /*   for(int j=0; j < n_cities; j++) { */
-  /*     printf("%.2f ", adj_m[i][j]); */
-  /*   } */
-  /*   printf("\n"); */
-  /* } */
+  for(int i=0; i < n_cities; i++) {
+    for(int j=0; j < n_cities; j++) {
+      printf("%.2f ", adj_m[i][j]);
+    }
+    printf("\n");
+  }
 
   // Finalize the MPI environment.
   MPI_Finalize();

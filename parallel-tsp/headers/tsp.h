@@ -29,5 +29,5 @@ void EvaluateTours(stack* stack_t, graph* graph_t, tour* best_tour, pthread_mute
 
 void InitializeStacks(int root_node, int n_stacks, int stack_size, stack* stacks[n_stacks], graph* graph_t);
 
-void FillStacks(int num_threads, int root_node, int stack_size, graph* graph_t, stack* stacks[num_threads]);
+void FillStacks(int root_node, int num_threads, int stack_size, stack* stacks[num_threads], graph* graph_t);
 
