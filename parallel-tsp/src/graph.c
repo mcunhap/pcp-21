@@ -25,7 +25,7 @@ struct graph_t {
   float** adjency_matrix;
 };
 
-graph* CreateGraph(int size, int nodes[size], float** adjency_matrix) {
+graph* CreateGraph(int size, int nodes[size], float adjency_matrix[size][size]) {
   graph* graph_t = (graph*) calloc (1, sizeof(graph));
 
   if(!graph_t) { printf("Failed to create graph.\n"); exit(-1); }

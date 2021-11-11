@@ -127,6 +127,7 @@ int GetSize(stack* stack_t) {
 
 // Just for debugging
 void PrintStackInfo(stack* stack_t) {
+  printf("Stack size: %d\n", GetSize(stack_t));
   for(int i=GetSize(stack_t) - 1; i >= 0; i--) {
     PrintTourInfo(stack_t->tours[i]);
   }
