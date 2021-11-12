@@ -133,6 +133,8 @@ void FillBFSQueue(int num_instances, graph* graph_t, queue* bfs_queue, tour* ini
   int visited_nodes[num_cities];
   tour* current_tour;
 
+  EnqueueCopy(bfs_queue, initial_tour);
+
   // initialize visited nodes array
   for(int i=0; i < num_cities; i++) {
     if(TourContainCity(initial_tour, i)) {

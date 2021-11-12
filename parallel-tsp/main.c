@@ -99,27 +99,29 @@ void ThreadsSplit(int num_threads, stack** stacks, queue* bfs_queue) {
 
 int main(void) {
   /* InitializeInstance(); */
-
+  // Initialize graph
   graph_t = CreateGraph(n_cities, nodes, adj_m);
   int n_cities = NumNodes(graph_t);
-  queue* bfs_queue = CreateQueue((n_cities*n_cities)/2);
+
+  // Initialize globals
+  best_tour = CreateTour(n_cities + 1);
+  term_t = CreateTerm();
+  pthread_mutex_init(&execute_mutex, NULL);
+
+  // Initial tour
   tour* initial_tour = CreateTour(n_cities + 1);
+  AddCity(initial_tour, graph_t, HOMETOWN);
+
+  // Create bfs queue
+  queue* bfs_queue = CreateQueue((n_cities*n_cities)/2);
+  FillBFSQueue(NUM_THREADS, graph_t, bfs_queue, initial_tour);
+
+  // Initialize threads stacks
   stack* threads_stacks[NUM_THREADS];
 
   for(int i=0; i<NUM_THREADS; i++) {
     threads_stacks[i] = CreateStack((n_cities*n_cities)/2);
   }
-
-  AddCity(initial_tour, graph_t, HOMETOWN);
-  EnqueueCopy(bfs_queue, initial_tour);
-
-  FillBFSQueue(NUM_THREADS, graph_t, bfs_queue, initial_tour);
-
-  best_tour = CreateTour(n_cities + 1);
-
-  term_t = CreateTerm();
-
-  pthread_mutex_init(&execute_mutex, NULL);
 
   ThreadsSplit(NUM_THREADS, threads_stacks, bfs_queue);
 
