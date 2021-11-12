@@ -32,5 +32,7 @@ int EmptyQueue(queue* queue_t);
 
 int SizeQueue(queue* queue_t);
 
+int MaxSizeQueue(queue* queue_t);
+
 // Just for debugging
 void PrintQueueInfo(queue* queue_t);

@@ -37,5 +37,7 @@ tour* GetLastTour(stack* stack_t);
 
 int GetSize(stack* stack_t);
 
+int GetMaxSize(stack* stack_t);
+
 // Just for debugging
 void PrintStackInfo(stack* stack_t);

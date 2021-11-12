@@ -91,6 +91,10 @@ int SizeQueue(queue* queue_t) {
   return queue_t->size;
 }
 
+int MaxSizeQueue(queue* queue_t) {
+  return queue_t->max_size;
+}
+
 // Just for debugging
 void PrintQueueInfo(queue* queue_t) {
   printf("Queue size: %d\n", queue_t->size);

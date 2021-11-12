@@ -125,6 +125,10 @@ int GetSize(stack* stack_t) {
   return stack_t->size;
 }
 
+int GetMaxSize(stack* stack_t) {
+  return stack_t->max_size;
+}
+
 // Just for debugging
 void PrintStackInfo(stack* stack_t) {
   printf("Stack size: %d\n", GetSize(stack_t));

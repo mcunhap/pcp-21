@@ -144,6 +144,7 @@ void FillBFSQueue(int num_instances, graph* graph_t, queue* bfs_queue, tour* ini
     }
   }
 
+  // bug with five city instance...
   while(SizeQueue(bfs_queue) < num_instances) {
     current_tour = Dequeue(bfs_queue);
     int last_city = GetTourLastCity(current_tour);
