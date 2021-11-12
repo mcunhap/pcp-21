@@ -128,52 +128,46 @@ void EvaluateTours(stack* stack_t, graph* graph_t, tour* best_tour, pthread_mute
   }
 }
 
-int AnyStackNotFilled(int num_threads, stack* stacks[num_threads]) {
-  for(int i=0; i < num_threads; i++) {
-    if(GetTourNumberCities(GetLastTour(stacks[i])) == 1 ) { return 1; }
-  }
-
-  return 0;
-}
-
-void InitializeStacks(int root_node, int n_stacks, int stack_size, stack* stacks[n_stacks], graph* graph_t) {
-  tour* initial_tour = CreateTour(NumNodes(graph_t) + 1);
-  AddCity(initial_tour, graph_t, root_node);
-
-  // each stack initialize with minimal tour, that is only root node
-  for(int i=0; i < n_stacks; i++) {
-    stacks[i] = CreateStack(stack_size);
-    PushCopy(stacks[i], initial_tour);
-  }
-}
-
-void FillStacks(int root_node, int num_threads, int stack_size, stack* stacks[num_threads], graph* graph_t) {
-  float nbr_cost;
-  int num_nodes = NumNodes(graph_t);
-  int visited_nodes[num_nodes], current_node;
+void FillBFSQueue(int num_instances, graph* graph_t, queue* bfs_queue, tour* initial_tour) {
+  int num_cities = NumNodes(graph_t);
+  int visited_nodes[num_cities];
   tour* current_tour;
-  stack* current_stack;
 
   // initialize visited nodes array
-  for(int i=0; i < num_nodes; i++) { visited_nodes[i] = 0; }
+  for(int i=0; i < num_cities; i++) {
+    if(TourContainCity(initial_tour, i)) {
+      visited_nodes[i] = 1;
+    } else {
+      visited_nodes[i] = 0;
+    }
+  }
 
-  current_node = root_node;
+  while(SizeQueue(bfs_queue) < num_instances) {
+    current_tour = Dequeue(bfs_queue);
+    int last_city = GetTourLastCity(current_tour);
 
-  while(AnyStackNotFilled(num_threads, stacks)) {
-    for(int nbr=num_nodes-1; nbr >= 0; nbr--) {
-      nbr_cost = GetEdgeWeight(graph_t, current_node, nbr);
+    for(int nbr=num_cities-1; nbr >= 0; nbr--) {
+      int nbr_cost = GetEdgeWeight(graph_t, last_city, nbr);
 
       // current node not neighbour from nbr... this kind of loop is not so efficient, we always itera through all nodes - 1
-      if (nbr_cost == 0.0 || visited_nodes[current_node] == 1) { continue; }
+      if (nbr_cost == 0.0 || visited_nodes[nbr] == 1) { continue; }
 
-      current_stack = stacks[nbr % num_threads];
-      current_tour = GetLastTour(current_stack);
       AddCity(current_tour, graph_t, nbr);
-      PushCopy(current_stack, current_tour);
+      EnqueueCopy(bfs_queue, current_tour);
+      RemoveLastCity(current_tour, graph_t);
 
       visited_nodes[nbr] = 1;
     }
+  }
+}
 
-    current_node = GetTourLastCity(GetLastTour(stacks[0]));
+void ShareQueue(int num_instances, stack** stacks, queue* queue_t) {
+  int i = 0;
+
+  while(!EmptyQueue(queue_t)) {
+    stack* current_stack = stacks[i % num_instances];
+    PushCopy(current_stack, Dequeue(queue_t));
+
+    i++;
   }
 }

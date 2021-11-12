@@ -74,8 +74,7 @@ void RemoveLastCity(tour* tour_t, graph* graph_t) {
 }
 
 int TourContainCity(tour* tour_t, int city) {
-  // not include hometown in this verification
-  for(int i=1; i < tour_t->n_cities; i++) {
+  for(int i=0; i < tour_t->n_cities; i++) {
 
     if(tour_t->cities[i] == city) { return 1; }
   }

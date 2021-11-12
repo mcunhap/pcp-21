@@ -26,7 +26,7 @@ struct stack_t {
   int size;
 };
 
-stack* CreateStack(int max_cities) {
+stack* CreateStack(int max_size) {
   stack* stack_t = (stack*) calloc (1, sizeof(stack));
 
   if(!stack_t) {
@@ -34,8 +34,8 @@ stack* CreateStack(int max_cities) {
     exit(-1);
   }
 
-  stack_t->tours = (tour**) calloc (max_cities, sizeof(tour*));
-  stack_t->max_size = max_cities;
+  stack_t->tours = (tour**) calloc (max_size, sizeof(tour*));
+  stack_t->max_size = max_size;
   stack_t->size = 0;
 
   return stack_t;

@@ -19,7 +19,7 @@
 
 typedef struct tour_t tour;
 
-tour* CreateTour();
+tour* CreateTour(int max_cities);
 
 void FreeTour();
 

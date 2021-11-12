@@ -19,7 +19,7 @@
 
 typedef struct stack_t stack;
 
-stack* CreateStack(int max_cities);
+stack* CreateStack(int max_size);
 
 void FreeStack(stack* stack_t);
 
