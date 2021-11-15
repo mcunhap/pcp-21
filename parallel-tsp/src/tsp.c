@@ -46,7 +46,7 @@ int Termination(stack* my_stack, term* term_t, int num_threads) {
     pthread_mutex_lock(&term_t->term_mutex);
 
     if(term_t->threads_in_cond_wait > 0 && term_t->new_stack == NULL) {
-      printf("splitting stack...\n");
+      /* printf("splitting stack...\n"); */
       term_t->new_stack = SplitStack(my_stack);
 
       pthread_cond_signal(&term_t->term_cond_var);
@@ -63,7 +63,6 @@ int Termination(stack* my_stack, term* term_t, int num_threads) {
     if(term_t->threads_in_cond_wait == num_threads - 1) {
       // last thread running
       term_t->threads_in_cond_wait++;
-      printf("threads in wait: %d\n", term_t->threads_in_cond_wait);
       pthread_cond_broadcast(&term_t->term_cond_var);
 
       pthread_mutex_unlock(&term_t->term_mutex);
@@ -84,7 +83,6 @@ int Termination(stack* my_stack, term* term_t, int num_threads) {
 
         return 0;
       } else {
-        printf("all threads done!\n");
         pthread_mutex_unlock(&term_t->term_mutex);
 
         return 1;
@@ -93,47 +91,23 @@ int Termination(stack* my_stack, term* term_t, int num_threads) {
   }
 }
 
-void CheckNewBestTour(float* best_cost) {
+void CheckNewBestTour(float* best_tour, int src) {
   int msg_available;
   float received_cost;
   MPI_Status status;
+  MPI_Message msg;
 
-  MPI_Iprobe(MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, &msg_available, &status);
-
-  while(msg_available) {
-    MPI_Recv(&received_cost, 1, MPI_FLOAT, status.MPI_SOURCE, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
-    if(received_cost < *best_cost)
-      *best_cost = received_cost;
-
-    MPI_Iprobe(MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, &msg_available, &status);
+  MPI_Improbe(src, 0, MPI_COMM_WORLD, &msg_available, &msg, &status);
+  if(msg_available) {
+    MPI_Mrecv(&received_cost, 1, MPI_FLOAT, &msg, MPI_STATUS_IGNORE);
   }
 }
 
 void SendNewBestTour(float* best_tour, int num_processes, int process_rank) {
-  /* float* buf; */
-  /* int buf_size; */
-  /* int data_size; */
-  /* int message_size; */
-  /* int bcast_buf_size; */
-  /* MPI_Pack_size(1, MPI_FLOAT, MPI_COMM_WORLD, &data_size); */
-  /* message_size = data_size + MPI_BSEND_OVERHEAD; */
-  /* bcast_buf_size = (num_processes - 1)*message_size; */
-
-  /* float buffer[bcast_buf_size]; */
-
-  /* if(buf == NULL) { */
-  /*   MPI_Buffer_attach(buffer, bcast_buf_size); */
-  /* } else { */
-  /*   MPI_Buffer_attach(buf, buf_size); */
-  /* } */
-
   for(int dest = 0; dest < num_processes; dest++) {
     if(dest != process_rank)
       MPI_Send(best_tour, 1, MPI_FLOAT, dest, 0, MPI_COMM_WORLD);
   }
-
-  /* MPI_Buffer_detach(&buf, &buf_size); */
 }
 
 void EvaluateTours(stack* stack_t, graph* graph_t, float* best_tour, pthread_mutex_t evaluate_mutex, term* term_t, int n_cities, int hometown, int num_threads, int num_processes, int process_rank) {
@@ -146,13 +120,14 @@ void EvaluateTours(stack* stack_t, graph* graph_t, float* best_tour, pthread_mut
       // add hometown to current tour to compute the final cost
       AddCity(current_tour, graph_t, hometown);
 
-      CheckNewBestTour(best_tour);
+      for(int src = 0; src < num_processes; src++)
+        CheckNewBestTour(best_tour, src);
 
       if(BestTour(current_tour, *best_tour)) {
         pthread_mutex_lock(&evaluate_mutex);
 
-        printf("Update best tour!\n");
-        PrintTourInfo(current_tour);
+        /* printf("Update best tour!\n"); */
+        /* PrintTourInfo(current_tour); */
 
         *best_tour = GetTourCost(current_tour);
 

@@ -119,13 +119,19 @@ void InitializeInstance() {
     nodes[i] = i;
   }
 
-  ReadInstance(n_cities, "instances/13.txt", adj_m);
+  ReadInstance(n_cities, "instances/8.txt", adj_m);
 }
 
 int main(void) {
+  int provided;
   double start, end;
   // Initialize the MPI
-  MPI_Init(NULL, NULL);
+  MPI_Init_thread(NULL, NULL, MPI_THREAD_MULTIPLE, &provided);
+
+  if(provided < MPI_THREAD_MULTIPLE) {
+    printf("Failed to initialize MPI with thread level MPI_THREAD_MULTIPLE");
+    MPI_Abort(MPI_COMM_WORLD, 0);
+  }
 
   // Number of processes
   MPI_Comm_size(MPI_COMM_WORLD, &num_processes);
@@ -134,7 +140,6 @@ int main(void) {
   MPI_Comm_rank(MPI_COMM_WORLD, &process_rank);
 
   MPI_Barrier(MPI_COMM_WORLD);
-  start = MPI_Wtime();
 
   if(process_rank == 0) {
     ReadNCities(&n_cities);
@@ -159,6 +164,8 @@ int main(void) {
       MPI_Recv(adj_m[i], n_cities, MPI_FLOAT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
   }
 
+  start = MPI_Wtime();
+
   // Initialize graph
   graph_t = CreateGraph(n_cities, nodes, adj_m);
   int n_cities = NumNodes(graph_t);
@@ -178,10 +185,6 @@ int main(void) {
 
   ProcessesSplit(num_processes, process_rank, bfs_queue, graph_t);
 
-  printf("\nBEST TOUR: \n");
-  printf("Best tour: %.2f", best_tour);
-  /* PrintTourInfo(best_tour); */
-
   FreeQueue(bfs_queue);
 
   FreeGraph(graph_t);
@@ -193,6 +196,8 @@ int main(void) {
   MPI_Finalize();
 
   if (process_rank == 0) {
+    printf("\nBEST TOUR: \n");
+    printf("Best tour: %.2f", best_tour);
     printf("\nTotal execution time: %.2fs\n", end-start);
   }
 
