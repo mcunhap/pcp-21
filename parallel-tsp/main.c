@@ -123,6 +123,7 @@ void InitializeInstance() {
 }
 
 int main(void) {
+  double start, end;
   // Initialize the MPI
   MPI_Init(NULL, NULL);
 
@@ -131,6 +132,9 @@ int main(void) {
 
   // Rank of the process
   MPI_Comm_rank(MPI_COMM_WORLD, &process_rank);
+
+  MPI_Barrier(MPI_COMM_WORLD);
+  start = MPI_Wtime();
 
   if(process_rank == 0) {
     ReadNCities(&n_cities);
@@ -182,7 +186,15 @@ int main(void) {
 
   FreeGraph(graph_t);
 
+  MPI_Barrier(MPI_COMM_WORLD);
+  end = MPI_Wtime();
+
   // Finalize the MPI
   MPI_Finalize();
+
+  if (process_rank == 0) {
+    printf("\nTotal execution time: %.2fs\n", end-start);
+  }
+
   return 0;
 }
