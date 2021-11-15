@@ -32,7 +32,9 @@
 int n_cities;
 int* nodes;
 float** adj_m;
-tour* best_tour;
+float best_tour;
+int num_processes;
+int process_rank;
 graph* graph_t;
 pthread_mutex_t execute_mutex;
 term* term_t;
@@ -40,7 +42,7 @@ term* term_t;
 void* execute(void* arg) {
   stack* my_stack = (stack*)arg;
 
-  EvaluateTours(my_stack, graph_t, best_tour, execute_mutex, term_t, NumNodes(graph_t), HOMETOWN, NUM_THREADS);
+  EvaluateTours(my_stack, graph_t, &best_tour, execute_mutex, term_t, NumNodes(graph_t), HOMETOWN, NUM_THREADS, num_processes, process_rank);
 
   pthread_exit(NULL);
 }
@@ -125,11 +127,9 @@ int main(void) {
   MPI_Init(NULL, NULL);
 
   // Number of processes
-  int num_processes;
   MPI_Comm_size(MPI_COMM_WORLD, &num_processes);
 
   // Rank of the process
-  int process_rank;
   MPI_Comm_rank(MPI_COMM_WORLD, &process_rank);
 
   if(process_rank == 0) {
@@ -160,7 +160,7 @@ int main(void) {
   int n_cities = NumNodes(graph_t);
 
   // Initialize globals
-  best_tour = CreateTour(n_cities + 1);
+  best_tour = -1;
   term_t = CreateTerm();
   pthread_mutex_init(&execute_mutex, NULL);
 
@@ -175,7 +175,8 @@ int main(void) {
   ProcessesSplit(num_processes, process_rank, bfs_queue, graph_t);
 
   printf("\nBEST TOUR: \n");
-  PrintTourInfo(best_tour);
+  printf("Best tour: %.2f", best_tour);
+  /* PrintTourInfo(best_tour); */
 
   FreeQueue(bfs_queue);
 

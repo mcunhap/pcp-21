@@ -29,7 +29,7 @@ void RemoveLastCity(tour* tour_t, graph* graph_t);
 
 int TourContainCity(tour* tour_t, int city);
 
-int BestTour(tour* tour_t, tour* best);
+int BestTour(tour* tour_t, float best);
 
 int GetTourLastCity(tour* tour_t);
 

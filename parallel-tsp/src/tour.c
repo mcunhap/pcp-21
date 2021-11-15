@@ -82,10 +82,10 @@ int TourContainCity(tour* tour_t, int city) {
   return 0;
 }
 
-int BestTour(tour* tour_t, tour* best) {
+int BestTour(tour* tour_t, float best) {
   // initial case, when best empty
-  if(best->n_cities == 0) { return 1; }
-  if(tour_t->cost < best->cost) { return  1; }
+  if(best == -1) { return 1; }
+  if(tour_t->cost < best) { return  1; }
 
   return 0;
 }

@@ -37,7 +37,7 @@ graph: ./src/graph.c ./headers/graph.h
 
 ## Make tsp dependency
 tsp: ./src/tsp.c ./headers/tsp.h
-	gcc $(CFLAGS) -c $< -o ./src/obj/$@.o
+	mpicc $(CFLAGS) -c $< -o ./src/obj/$@.o
 
 ## Make utils dependency
 utils: ./src/utils.c ./headers/utils.h
