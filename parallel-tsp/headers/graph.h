@@ -17,7 +17,7 @@
  */
 typedef struct graph_t graph;
 
-graph* CreateGraph(int size, int nodes[size], float adjency_matrix[size][size]);
+graph* CreateGraph(int size, int nodes[size], float** adjency_matrix);
 
 void FreeGraph(graph* graph_t);
 
