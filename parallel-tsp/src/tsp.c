@@ -100,6 +100,7 @@ void CheckNewBestTour(float* best_tour, int src) {
   MPI_Improbe(src, 0, MPI_COMM_WORLD, &msg_available, &msg, &status);
   if(msg_available) {
     MPI_Mrecv(&received_cost, 1, MPI_FLOAT, &msg, MPI_STATUS_IGNORE);
+    *best_tour = received_cost;
   }
 }
 
@@ -129,14 +130,8 @@ void EvaluateTours(stack* stack_t, graph* graph_t, float* best_tour, pthread_mut
 
       if(BestTour(current_tour, *best_tour)) {
         pthread_mutex_lock(&evaluate_mutex);
-
-        /* printf("Update best tour!\n"); */
-        /* PrintTourInfo(current_tour); */
-
         *best_tour = GetTourCost(current_tour);
-
         SendNewBestTour(best_tour, num_processes, process_rank);
-
         pthread_mutex_unlock(&evaluate_mutex);
       }
     } else {

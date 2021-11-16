@@ -28,6 +28,7 @@
 
 #define HOMETOWN 0
 #define NUM_THREADS 4
+#define FILENAME "instances/13.txt"
 
 int n_cities;
 int* nodes;
@@ -119,7 +120,7 @@ void InitializeInstance() {
     nodes[i] = i;
   }
 
-  ReadInstance(n_cities, "instances/8.txt", adj_m);
+  ReadInstance(n_cities, FILENAME, adj_m);
 }
 
 int main(void) {
