@@ -116,6 +116,10 @@ void EvaluateTours(stack* stack_t, graph* graph_t, float* best_tour, pthread_mut
   while(!Termination(stack_t, term_t, num_threads)) {
     current_tour = Pop(stack_t);
 
+    if(GetTourCost(current_tour) > *best_tour && *best_tour != -1) {
+      continue;
+    }
+
     if(GetTourNumberCities(current_tour) == n_cities) {
       // add hometown to current tour to compute the final cost
       AddCity(current_tour, graph_t, hometown);
