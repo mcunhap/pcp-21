@@ -260,3 +260,47 @@ O método de envio manda para todas os processos diferentes dele o novo valor de
 
 Foram feitos testes para verificar o tempo de execução para 1, 2, 4 e 8 processos e 2 ou 4 threads em cada processo. Para medir o tempo de execução foi utilizado o método `MPI_Wtime()` da biblioteca do MPI. Abaixo estão os resultados para as instâncias utilizadas.
 
+#####Instância com 13 cidades:
+
+######1 processo
+	2 threads
+	
+	[inf2591-06@server parallel-tsp]$ mpirun -np 1 --hostfile host_file ./main
+	Cities number:
+	13
+	
+	BEST TOUR:
+	Best tour: 269.00
+	Total execution time: 6.57s
+	-------------------------------------
+	4 threads
+	
+	[inf2591-06@server parallel-tsp]$ mpirun -np 1 --hostfile host_file ./main
+	Cities number:
+	13
+	
+	BEST TOUR:
+	Best tour: 269.00
+	Total execution time: 8.99s
+######2 processos
+	2 threads
+	
+	[inf2591-06@server parallel-tsp]$ mpirun -np 2 --hostfile host_file ./main
+	Cities number:
+	13
+	
+	BEST TOUR:
+	Best tour: 269.00
+	Total execution time: 2.24s
+	-------------------------------------
+	4 threads
+	
+	[inf2591-06@server parallel-tsp]$ mpirun -np 2 --hostfile host_file ./main
+	Cities number:
+	13
+	
+	BEST TOUR:
+	Best tour: 269.00
+	Total execution time: 3.87s
+######4 processos
+######8 processos
