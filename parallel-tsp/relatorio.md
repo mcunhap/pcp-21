@@ -1,5 +1,13 @@
 ## TSP com MPI e Threads
 
+### Como executar
+
+O projeto tem um `Makefile`. Para compilar o programa basta executar `make mpiapp`, lembrando que é necessário o `mpicc` para compilar programas com MPI.  
+Para executar o código utilizar `mpirun -np <x> --hostfile host_file ./main`, sendo `x` a quantidade de processos.   
+Para alterar o número de _threads_ basta modificar a constante `NUM_THREADS` no arquivo `main.c`.  
+Para alterar a instância utilizada no programa, basta alterar o nome do arquivo na constante `FILENAME` no arquivo `main.c`. As opções de instâncias estão na pasta `/instances`.   
+Ao executar o código deve-se informar o número de cidades da instância escolhida.
+
 ###Desenvolvimento
 
 Separei o desenvolvimento nas seguintes etapas:  
@@ -24,9 +32,12 @@ Nessa primeira etapa tinha apenas um processo e um código sem _threads_, portan
 
 	while(!Empty(stack_t)) {	
 	  current_tour = Pop(stack_t);
+	  
+	  if(GetTourCost(current_tour) > *best_tour && *best_tour != -1) {
+        continue;
+      }
 		
 	  if(GetTourNumberCities(current_tour) == n_cities) {
-		 // add hometown to current tour to compute the final cost
 		 cost = GetEdgeWeight(graph_t, LastCity(current_tour), hometown);
 		 AddCity(current_tour, hometown, cost);
 		
@@ -59,7 +70,6 @@ O balanceamento inicial consistia em uma busca em largura até a quantidade de n
 	
 	  EnqueueCopy(bfs_queue, initial_tour);
 	
-	  // initialize visited nodes array
 	  for(int i=0; i < num_cities; i++) {
 	    if(TourContainCity(initial_tour, i)) {
 	      visited_nodes[i] = 1;
@@ -75,7 +85,6 @@ O balanceamento inicial consistia em uma busca em largura até a quantidade de n
 	    for(int nbr=num_cities-1; nbr >= 0; nbr--) {
 	      int nbr_cost = GetEdgeWeight(graph_t, last_city, nbr);
 	
-	      // current node not neighbour from nbr
 	      if (nbr_cost == 0.0 || visited_nodes[nbr] == 1) { continue; }
 	
 	      AddCity(current_tour, graph_t, nbr);
@@ -185,7 +194,69 @@ Com todos processos tendo a instância inicial era necessário fazer uma busca e
 	  FreeQueue(threads_bfs_queue);
 	}
 	
-Com a divisão finalizada bastava executar o algoritmo TSP para cada uma das _stacks_ de cada uma das _threads_ dos processos. Entretanto, ainda era possível otimizar compartilhando o melhor _tour_ entre os processos.
+Com a divisão finalizada bastava executar o algoritmo TSP para cada uma das _stacks_ de cada uma das _threads_ dos processos. Entretanto, ainda era possível otimizar compartilhando o melhor _tour_ entre os processos. Então, foi adicionado ao código da avaliação de _tours_ métodos para receber e enviar novas melhores rotas.  
 
-...
+	void CheckNewBestTour(float* best_tour, int src) {
+	  int msg_available;
+	  float received_cost;
+	  MPI_Status status;
+	  MPI_Message msg;
+	
+	  MPI_Improbe(src, 0, MPI_COMM_WORLD, &msg_available, &msg, &status);
+	  if(msg_available) {
+	    MPI_Mrecv(&received_cost, 1, MPI_FLOAT, &msg, MPI_STATUS_IGNORE);
+	    *best_tour = received_cost;
+	  }
+	}
+	
+	void SendNewBestTour(float* best_tour, int num_processes, int process_rank) {
+	  for(int dest = 0; dest < num_processes; dest++) {
+	    if(dest != process_rank)
+	      MPI_Send(best_tour, 1, MPI_FLOAT, dest, 0, MPI_COMM_WORLD);
+	  }
+	}
+
+O método de envio manda para todas os processos diferentes dele o novo valor de melhor _tour_. Já o método de receber verifica se há algum novo melhor _tour_, caso exista então ele atribui a variável de melhor _tour_. O código de avaliação de _tours_ ficou da seguinte maneira:
+
+	void EvaluateTours(stack* stack_t, graph* graph_t, float* best_tour, pthread_mutex_t evaluate_mutex, term* term_t, int n_cities, int hometown, int num_threads, int num_processes, int process_rank) {
+	  tour* current_tour;
+	
+	  while(!Termination(stack_t, term_t, num_threads)) {
+	    current_tour = Pop(stack_t);
+	
+	    if(GetTourCost(current_tour) > *best_tour && *best_tour != -1) {
+	      continue;
+	    }
+	
+	    if(GetTourNumberCities(current_tour) == n_cities) {
+	      AddCity(current_tour, graph_t, hometown);
+	
+	      for(int src = 0; src < num_processes; src++)
+	        CheckNewBestTour(best_tour, src);
+	
+	      if(BestTour(current_tour, *best_tour)) {
+	        pthread_mutex_lock(&evaluate_mutex);
+	        *best_tour = GetTourCost(current_tour);
+	        SendNewBestTour(best_tour, num_processes, process_rank);
+	        pthread_mutex_unlock(&evaluate_mutex);
+	      }
+	    } else {
+	      for (int nbr=n_cities-1; nbr >= 0; nbr--) {
+	        if (nbr == hometown) { continue; }
+	
+	        if(!TourContainCity(current_tour, nbr)) {
+	          AddCity(current_tour, graph_t, nbr);
+	          PushCopy(stack_t, current_tour);
+	          RemoveLastCity(current_tour, graph_t);
+	        }
+	      }
+ 	    }
+	    FreeTour(current_tour);
+	  }
+	}
+
+
+#### Testes
+
+Foram feitos testes para verificar o tempo de execução para 1, 2, 4 e 8 processos e 2 ou 4 threads em cada processo. Para medir o tempo de execução foi utilizado o método `MPI_Wtime()` da biblioteca do MPI. Abaixo estão os resultados para as instâncias utilizadas.
 
