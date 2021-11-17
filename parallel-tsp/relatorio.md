@@ -16,7 +16,6 @@ Separei o desenvolvimento nas seguintes etapas:
 2. Solução apenas com threads
 3. Solução com MPI e threads
 
-Obs: na segunda etapa a avaliação de melhor _tour_ era local, não havia compartilhamento entre _threads_.
 
 #### Solução sem threads e MPI
 
@@ -61,7 +60,7 @@ Nessa primeira etapa tinha apenas um processo e um código sem _threads_, portan
 #### Solução com threads
 
 Com a primeira etapa consolidada a solução foi extendida para utilizar _pthreads_. O balanceamento das _threads_ foi feito inicialmente com uma busca em largura, e depois conforme as _threads_ terminavam seus trabalhos elas buscavam novos trabalhos com outras _threads_ que ainda não haviam terminado (como foi sugerido no livro).  
-O balanceamento inicial consistia em uma busca em largura até a quantidade de nós do nível da busca ser pelo menos a quantidade de _threads_ seguido de uma divisão do _queue_ entre as _threads_, pois dessa maneira cada _thread_ tem pelo menos um "ramo da árvore" para analisar.  
+O código abaixo mostra a busca em largura para o balanceamento inicial, e depois o código para divisão da fila da busca em largura entre as _threads_.
 
 	void FillBFSQueue(int num_instances, graph* graph_t, queue* bfs_queue, tour* initial_tour) {
 	  int num_cities = NumNodes(graph_t);
@@ -216,7 +215,7 @@ Com a divisão finalizada bastava executar o algoritmo TSP para cada uma das _st
 	  }
 	}
 
-O método de envio manda para todas os processos diferentes dele o novo valor de melhor _tour_. Já o método de receber verifica se há algum novo melhor _tour_, caso exista então ele atribui a variável de melhor _tour_. O código de avaliação de _tours_ ficou da seguinte maneira:
+O método de envio manda para todas os processos diferentes dele o novo valor de melhor _tour_. Já o método de receber verifica se há algum novo melhor _tour_, caso exista, então ele atribui a variável de melhor _tour_. O código de avaliação de _tours_ ficou da seguinte maneira:
 
 	void EvaluateTours(stack* stack_t, graph* graph_t, float* best_tour, pthread_mutex_t evaluate_mutex, term* term_t, int n_cities, int hometown, int num_threads, int num_processes, int process_rank) {
 	  tour* current_tour;
