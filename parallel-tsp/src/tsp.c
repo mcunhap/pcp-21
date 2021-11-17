@@ -19,6 +19,8 @@
 #include <stdio.h>
 #include "../headers/tsp.h"
 
+#define NEW_BEST_TOUR_TAG 8
+
 struct term_t {
   stack* new_stack;
   int threads_in_cond_wait;
@@ -97,7 +99,7 @@ void CheckNewBestTour(float* best_tour, int src) {
   MPI_Status status;
   MPI_Message msg;
 
-  MPI_Improbe(src, 0, MPI_COMM_WORLD, &msg_available, &msg, &status);
+  MPI_Improbe(src, NEW_BEST_TOUR_TAG, MPI_COMM_WORLD, &msg_available, &msg, &status);
   if(msg_available) {
     MPI_Mrecv(&received_cost, 1, MPI_FLOAT, &msg, MPI_STATUS_IGNORE);
     *best_tour = received_cost;
@@ -107,7 +109,7 @@ void CheckNewBestTour(float* best_tour, int src) {
 void SendNewBestTour(float* best_tour, int num_processes, int process_rank) {
   for(int dest = 0; dest < num_processes; dest++) {
     if(dest != process_rank)
-      MPI_Send(best_tour, 1, MPI_FLOAT, dest, 0, MPI_COMM_WORLD);
+      MPI_Send(best_tour, 1, MPI_FLOAT, dest, NEW_BEST_TOUR_TAG, MPI_COMM_WORLD);
   }
 }
 

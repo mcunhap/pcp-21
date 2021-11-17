@@ -258,49 +258,106 @@ O método de envio manda para todas os processos diferentes dele o novo valor de
 
 #### Testes
 
-Foram feitos testes para verificar o tempo de execução para 1, 2, 4 e 8 processos e 2 ou 4 threads em cada processo. Para medir o tempo de execução foi utilizado o método `MPI_Wtime()` da biblioteca do MPI. Abaixo estão os resultados para as instâncias utilizadas.
+Foram feitos testes para verificar o tempo de execução para 1, 2, 4 e 8 processos e 2 ou 4 threads em cada processo. Para medir o tempo de execução foi utilizado o método `MPI_Wtime()` da biblioteca do MPI. Foi sugerido utilizar as instâncias de 12 e 15 cidades.  
+ Abaixo segue os resultados para a instância de 12 cidades. Para a instância de 15 cidades tive algum problema de memória (eu acho...) na execução, onde o MPI aborta, abaixo deixarei a tentativa de execução e o erro reportado, tentei descobrir o que poderia ser, mas não encontrei solução.
 
-#####Instância com 13 cidades:
+
+#####Instância com 12 cidades:
+
+	   0 300 352 466 217 238 431 336 451  47 415 515
+	 300   0 638 180 595 190 138 271 229 236 214 393
+	 352 638   0 251  88 401 189 386 565 206 292 349
+	 466 180 251   0 139 371 169 316 180 284 206 198
+	 217 595  88 139   0 310 211 295 474 130 133 165
+	 238 190 401 371 310   0 202 122 378 157 362 542
+	 431 138 189 169 211 202   0 183  67 268 117 369
+	 336 271 386 316 295 122 183   0 483 155 448 108
+	 451 229 565 180 474 378  67 483   0 299 246 418
+	  47 236 206 284 130 157 268 155 299   0 202 327
+	 415 214 292 206 133 362 117 448 246 202   0 394
+	 515 393 349 198 165 542 368 108 418 327 394   0
+	 
+Podemos ver abaixo que quando executamos com 2 threads o desempenho é melhor. Inclusive, podemos ver que a execução com 4 e 8 processos para 2 threads tem, praticamente, o mesmo tempo de execução.
 
 ######1 processo
 	2 threads
 	
 	[inf2591-06@server parallel-tsp]$ mpirun -np 1 --hostfile host_file ./main
 	Cities number:
-	13
+	12
 	
 	BEST TOUR:
-	Best tour: 269.00
-	Total execution time: 6.57s
+	Best tour: 1733.00
+	Total execution time: 2.10s
 	-------------------------------------
 	4 threads
 	
 	[inf2591-06@server parallel-tsp]$ mpirun -np 1 --hostfile host_file ./main
 	Cities number:
-	13
+	12
 	
 	BEST TOUR:
-	Best tour: 269.00
-	Total execution time: 8.99s
+	Best tour: 1733.00
+	Total execution time: 2.69s
 ######2 processos
 	2 threads
 	
 	[inf2591-06@server parallel-tsp]$ mpirun -np 2 --hostfile host_file ./main
 	Cities number:
-	13
+	12
 	
 	BEST TOUR:
-	Best tour: 269.00
-	Total execution time: 2.24s
+	Best tour: 1733.00
+	Total execution time: 1.35s
 	-------------------------------------
 	4 threads
 	
 	[inf2591-06@server parallel-tsp]$ mpirun -np 2 --hostfile host_file ./main
 	Cities number:
-	13
+	12
 	
 	BEST TOUR:
-	Best tour: 269.00
-	Total execution time: 3.87s
+	Best tour: 1733.00
+	Total execution time: 1.51s
 ######4 processos
+	2 threads
+	
+	[inf2591-06@server parallel-tsp]$ mpirun -np 4 --hostfile host_file ./main
+	Cities number:
+	12
+	
+	BEST TOUR:
+	Best tour: 1733.00
+	Total execution time: 0.78s
+	-------------------------------------
+	4 threads
+	
+	[inf2591-06@server parallel-tsp]$ mpirun -np 4 --hostfile host_file ./main
+	Cities number:
+	12
+	
+	BEST TOUR:
+	Best tour: 1733.00
+	Total execution time: 1.21s
 ######8 processos
+	2 threads
+
+	[inf2591-06@server parallel-tsp]$ mpirun -np 8 --hostfile host_file ./main
+	Cities number:
+	12
+	
+	BEST TOUR:
+	Best tour: 1733.00
+	Total execution time: 0.77s
+	-------------------------------------
+	4 threads
+	
+	[inf2591-06@server parallel-tsp]$ mpirun -np 8 --hostfile host_file ./main
+	Cities number:
+	12
+	
+	BEST TOUR:
+	Best tour: 1733.00
+	Total execution time: 1.06s
+	
+#####Instância com 15 cidades:

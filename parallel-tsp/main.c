@@ -28,7 +28,8 @@
 
 #define HOMETOWN 0
 #define NUM_THREADS 4
-#define FILENAME "instances/13.txt"
+#define FILENAME "instances/12.txt"
+#define BEST_TOUR_FINAL_SYNC_TAG 6
 
 int n_cities;
 int* nodes;
@@ -185,6 +186,20 @@ int main(void) {
   FillBFSQueue(num_processes, graph_t, bfs_queue, initial_tour);
 
   ProcessesSplit(num_processes, process_rank, bfs_queue, graph_t);
+
+  // Final sync for best tour
+  if(process_rank != 0) {
+    MPI_Send(&best_tour, 1, MPI_FLOAT, 0, BEST_TOUR_FINAL_SYNC_TAG, MPI_COMM_WORLD);
+  } else {
+    for(int dest=1; dest < num_processes; dest++) {
+      float received_cost;
+      MPI_Recv(&received_cost, 1, MPI_FLOAT, dest, BEST_TOUR_FINAL_SYNC_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+      if(received_cost < best_tour) {
+        best_tour = received_cost;
+      }
+    }
+  }
 
   FreeQueue(bfs_queue);
 
