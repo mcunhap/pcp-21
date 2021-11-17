@@ -28,7 +28,7 @@
 
 #define HOMETOWN 0
 #define NUM_THREADS 4
-#define FILENAME "instances/12.txt"
+#define FILENAME "instances/15.txt"
 #define BEST_TOUR_FINAL_SYNC_TAG 6
 
 int n_cities;

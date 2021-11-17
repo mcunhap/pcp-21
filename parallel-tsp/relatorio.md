@@ -222,11 +222,7 @@ O método de envio manda para todas os processos diferentes dele o novo valor de
 	
 	  while(!Termination(stack_t, term_t, num_threads)) {
 	    current_tour = Pop(stack_t);
-	
-	    if(GetTourCost(current_tour) > *best_tour && *best_tour != -1) {
-	      continue;
-	    }
-	
+
 	    if(GetTourNumberCities(current_tour) == n_cities) {
 	      AddCity(current_tour, graph_t, hometown);
 	
@@ -245,6 +241,12 @@ O método de envio manda para todas os processos diferentes dele o novo valor de
 	
 	        if(!TourContainCity(current_tour, nbr)) {
 	          AddCity(current_tour, graph_t, nbr);
+	          	
+	          if(GetTourCost(current_tour) > *best_tour && *best_tour != -1) {
+	            RemoveLastCity(current_tour, graph_t);
+	            continue;
+	          }
+	          
 	          PushCopy(stack_t, current_tour);
 	          RemoveLastCity(current_tour, graph_t);
 	        }
@@ -274,9 +276,6 @@ Ao final da execução foi preciso fazer uma sincronização do melhor _tour_, p
 #### Testes
 
 Foram feitos testes para verificar o tempo de execução para 1, 2, 4 e 8 processos e 2 ou 4 threads em cada processo. Para medir o tempo de execução foi utilizado o método `MPI_Wtime()` da biblioteca do MPI. Foi sugerido utilizar as instâncias de 12 e 15 cidades.  
- Abaixo segue os resultados para a instância de 12 cidades. Para a instância de 15 cidades tive algum problema de memória (eu acho...) na execução, onde o MPI aborta, abaixo deixarei a tentativa de execução e o erro reportado, tentei descobrir o que poderia ser, mas não encontrei solução.  
- Ambas instâncias se encontram na pasta `/instances`.
-
 
 #####Instância com 12 cidades:
 
@@ -393,23 +392,90 @@ Podemos ver abaixo que quando executamos com 2 threads o desempenho é melhor. I
 	23 11 64 51 46 51 51 33 29 41 42 61  0 62 23
 	72 52 31 43 65 29 46 31 51 23 59 11 62  0 59
 	46 21 51 64 23 59 33 37 11 37 61 55 23 59  0
+	
+Podemos ver que para a instância de 15 cidades a execução com 4 threads se saiu melhor no geral.
 
+######1 processo
+	2 threads
+	
+	[inf2591-06@server parallel-tsp]$ mpirun -np 1 --hostfile host_file ./main
+	Cities number:
+	15
+	
+	BEST TOUR:
+	Best tour: 291.00
+	Total execution time: 52.13s
+
+	-------------------------------------
+	4 threads
+	
+	[inf2591-06@server parallel-tsp]$ mpirun -np 1 --hostfile host_file ./main
+	Cities number:
+	15
+	
+	BEST TOUR:
+	Best tour: 291.00
+	Total execution time: 32.91s
+######2 processos
+	2 threads
+	
+	[inf2591-06@server parallel-tsp]$ mpirun -np 2 --hostfile host_file ./main
+	Cities number:
+	15
+	
+	BEST TOUR:
+	Best tour: 291.00
+	Total execution time: 18.55s
+
+	-------------------------------------
+	4 threads
+	
+	[inf2591-06@server parallel-tsp]$ mpirun -np 2 --hostfile host_file ./main
+	Cities number:
+	15
+	
+	BEST TOUR:
+	Best tour: 291.00
+	Total execution time: 12.00s
+######4 processos
+	2 threads
+
+	[inf2591-06@server parallel-tsp]$ mpirun -np 4 --hostfile host_file ./main
+	Cities number:
+	15
+	
+	BEST TOUR:
+	Best tour: 291.00
+	Total execution time: 11.74s	
+
+	-------------------------------------
+	4 threads
+	
+	[inf2591-06@server parallel-tsp]$ mpirun -np 4 --hostfile host_file ./main
+	Cities number:
+	15
+	
+	BEST TOUR:
+	Best tour: 291.00
+	Total execution time: 13.12s
+######8 processos
+	2 threads
 
 	[inf2591-06@server parallel-tsp]$ mpirun -np 8 --hostfile host_file ./main
 	Cities number:
 	15
+	
+	BEST TOUR:
+	Best tour: 291.00
+	Total execution time: 11.11s
 
-	===================================================================================
-	=   BAD TERMINATION OF ONE OF YOUR APPLICATION PROCESSES
-	=   PID 10734 RUNNING AT n01.cluster.inf.puc-rio.br
-	=   EXIT CODE: 9
-	=   CLEANING UP REMAINING PROCESSES
-	=   YOU CAN IGNORE THE BELOW CLEANUP MESSAGES
-	===================================================================================
-	[proxy:0:0@n00.cluster.inf.puc-rio.br] HYD_pmcd_pmip_control_cmd_cb (pm/pmiserv/pmip_cb.c:887): assert (!closed) failed
-	[proxy:0:0@n00.cluster.inf.puc-rio.br] HYDT_dmxu_poll_wait_for_event (tools/demux/demux_poll.c:76): callback returned error status
-	[proxy:0:0@n00.cluster.inf.puc-rio.br] main (pm/pmiserv/pmip.c:202): demux engine error waiting for event
-	[mpiexec@server.cluster.inf.puc-rio.br] HYDT_bscu_wait_for_completion (tools/bootstrap/utils/bscu_wait.c:76): one of the processes terminated badly; aborting
-	[mpiexec@server.cluster.inf.puc-rio.br] HYDT_bsci_wait_for_completion (tools/bootstrap/src/bsci_wait.c:23): launcher returned error waiting for completion
-	[mpiexec@server.cluster.inf.puc-rio.br] HYD_pmci_wait_for_completion (pm/pmiserv/pmiserv_pmci.c:218): launcher returned error waiting for completion
-	[mpiexec@server.cluster.inf.puc-rio.br] main (ui/mpich/mpiexec.c:340): process manager error waiting for completion
+	-------------------------------------
+	4 threads
+	
+	[inf2591-06@server parallel-tsp]$ mpirun -np 8 --hostfile host_file ./main
+	Cities number:
+	15
+	
+	BEST TOUR:
+	Best tour: 291.00
+	Total execution time: 10.79s
