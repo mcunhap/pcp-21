@@ -36,40 +36,40 @@ float best_tour;
 graph* graph_t;
 pthread_mutex_t execute_mutex;
 term* term_t;
+stack* threads_stacks[NUM_THREADS];
 
 void* execute(void* arg) {
-  stack* my_stack = (stack*)arg;
+  int my_stack = (int)arg;
 
-  EvaluateTours(my_stack, graph_t, &best_tour, execute_mutex, term_t, NumNodes(graph_t), HOMETOWN, NUM_THREADS);
+  EvaluateTours(threads_stacks[my_stack], graph_t, &best_tour, execute_mutex, term_t, NumNodes(graph_t), HOMETOWN, NUM_THREADS);
 
   pthread_exit(NULL);
 }
 
-void ThreadsSplit(int num_threads, queue* bfs_queue) {
+void ThreadsSplit(queue* bfs_queue) {
   int error;
-  stack* threads_stacks[num_threads];
 
   // Initialize threads stacks
   for(int i=0; i<NUM_THREADS; i++) {
     threads_stacks[i] = CreateStack((n_cities*n_cities)/2);
   }
 
-  ShareQueue(num_threads, threads_stacks, bfs_queue);
+  ShareQueue(NUM_THREADS, threads_stacks, bfs_queue);
 
   pthread_t* workers = (pthread_t*) calloc (NUM_THREADS, sizeof(pthread_t));
   if (!workers) { exit(-1); }
 
-  for(int i=0; i < num_threads; i++) {
-    error = pthread_create(&workers[i], NULL, &execute, (void*)threads_stacks[i]);
+  for(int i=0; i < NUM_THREADS; i++) {
+    error = pthread_create(&workers[i], NULL, &execute, (void*)i);
     if(error) { printf("Failed to create thread: %lu\n", (long)workers[i]); exit(-1); }
   }
 
-  for(int i=0; i < num_threads; i++) {
+  for(int i=0; i < NUM_THREADS; i++) {
     error = pthread_join(workers[i], NULL);
     if(error) { printf("Failed to join thread: %lu\n", (long)workers[i]); exit(-1); }
   }
 
-  for(int i=0; i < num_threads; i++) {
+  for(int i=0; i < NUM_THREADS; i++) {
     FreeStack(threads_stacks[i]);
   }
 }
@@ -117,7 +117,7 @@ int main(void) {
   queue* bfs_queue = CreateQueue((n_cities*n_cities)/2);
   FillBFSQueue(NUM_THREADS, graph_t, bfs_queue, initial_tour);
 
-  ThreadsSplit(NUM_THREADS, bfs_queue);
+  ThreadsSplit(bfs_queue);
 
   FreeQueue(bfs_queue);
   FreeGraph(graph_t);
