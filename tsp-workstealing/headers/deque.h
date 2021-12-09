@@ -32,3 +32,5 @@ void PushBottomDeque(deque* deque_t, tour* tour_t);
 tour* PopTopDeque(deque* deque_t);
 
 tour* PopBottomDeque(deque* deque_t);
+
+void PrintDeque(deque* deque_t);

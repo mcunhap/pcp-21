@@ -12,7 +12,7 @@ PROJECT := Parallel TSP Workstealing
 CFLAGS = -Wall
 
 ## Object files
-_OBJ_FILES = tour.o stack.o graph.o tsp.o utils.o queue.o
+_OBJ_FILES = tour.o stack.o graph.o tsp.o utils.o queue.o circular_array.o deque.o
 OBJ_FILES = $(_OBJ_FILES:%.o=./src/obj/%.o)
 
 ## Build imagem Docker
@@ -47,6 +47,14 @@ utils: ./src/utils.c ./headers/utils.h
 queue: ./src/queue.c ./headers/queue.h
 	gcc $(CFLAGS) -c $< -o ./src/obj/$@.o
 
+## Make circular array dependency
+circular_array: ./src/circular_array.c ./headers/circular_array.h
+	gcc $(CFLAGS) -c $< -o ./src/obj/$@.o
+
+## Make deque dependency
+deque: ./src/deque.c ./headers/deque.h
+	gcc $(CFLAGS) -c $< -o ./src/obj/$@.o
+
 ## Make project dependencies
 dependencies:
 	make tour
@@ -55,6 +63,8 @@ dependencies:
 	make tsp
 	make utils
 	make queue
+	make circular_array
+	make deque
 
 ## Make entire app
 app:

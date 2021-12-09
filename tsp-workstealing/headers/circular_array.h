@@ -31,3 +31,5 @@ void FreeCircularArray(circular_array* c_array);
 int GetCapacity(circular_array* c_array);
 
 circular_array* Resize(circular_array* c_array, int bottom, int top);
+
+void PrintCArray(circular_array* c_array, int bottom, int top);

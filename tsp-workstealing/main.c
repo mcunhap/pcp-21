@@ -24,6 +24,7 @@
 #include "headers/tsp.h"
 #include "headers/utils.h"
 #include "headers/queue.h"
+#include "headers/deque.h"
 
 #define HOMETOWN 0
 #define NUM_THREADS 4
@@ -125,5 +126,19 @@ int main(void) {
   printf("\nBEST TOUR: \n");
   printf("Best tour: %.2f", best_tour);
 
+  /* deque* deque_t = CreateDeque(10); */
+  /* tour* tour_t = CreateTour(n_cities + 1); */
+  /* tour* tour_s = CreateTour(n_cities + 1); */
+  /* AddCity(tour_t, graph_t, 1); */
+  /* AddCity(tour_t, graph_t, 2); */
+  /* AddCity(tour_s, graph_t, 3); */
+
+  /* PushBottomDeque(deque_t, tour_t); */
+  /* PushBottomDeque(deque_t, tour_s); */
+  /* PrintDeque(deque_t); */
+
+  /* PrintTourInfo(PopTopDeque(deque_t)); */
+
+  /* PrintDeque(deque_t); */
   return 0;
 }

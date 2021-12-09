@@ -68,3 +68,10 @@ circular_array* Resize(circular_array* c_array, int bottom, int top) {
   FreeCircularArray(c_array);
   return new_c_array;
 }
+
+void PrintCArray(circular_array* c_array, int bottom, int top) {
+  printf("Capacity: %d\n", c_array->capacity);
+  for(int i= top; i < bottom; i++) {
+    PrintTourInfo(c_array->tours[i]);
+  }
+}
