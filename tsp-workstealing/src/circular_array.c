@@ -43,7 +43,7 @@ tour* Get(circular_array* c_array, int i) {
 }
 
 void Put(circular_array* c_array, int i, tour* tour) {
-  c_array->tours[i * c_array->capacity] = tour;
+  c_array->tours[i % c_array->capacity] = tour;
 }
 
 void FreeCircularArray(circular_array* c_array) {
@@ -52,6 +52,10 @@ void FreeCircularArray(circular_array* c_array) {
   }
 
   free(c_array->tours);
+}
+
+int GetCapacity(circular_array* c_array) {
+  return c_array->capacity;
 }
 
 circular_array* Resize(circular_array* c_array, int bottom, int top) {
