@@ -69,7 +69,7 @@ void PushBottomDeque(deque* deque_t, tour* tour_t) {
   int size = old_bottom - old_top;
   circular_array* current_c_array = deque_t->c_array;
 
-  if(size >= GetCapacity(current_c_array) - 1) {
+  if(size >= GetCapacity(current_c_array)) {
     current_c_array = Resize(current_c_array, old_bottom, old_top);
     deque_t->c_array = current_c_array;
   }

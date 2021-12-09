@@ -126,18 +126,22 @@ int main(void) {
   printf("\nBEST TOUR: \n");
   printf("Best tour: %.2f", best_tour);
 
-  /* deque* deque_t = CreateDeque(10); */
+  /* deque* deque_t = CreateDeque(2); */
   /* tour* tour_t = CreateTour(n_cities + 1); */
   /* tour* tour_s = CreateTour(n_cities + 1); */
+  /* tour* tour_q = CreateTour(n_cities + 1); */
   /* AddCity(tour_t, graph_t, 1); */
   /* AddCity(tour_t, graph_t, 2); */
   /* AddCity(tour_s, graph_t, 3); */
+  /* AddCity(tour_q, graph_t, 4); */
 
   /* PushBottomDeque(deque_t, tour_t); */
   /* PushBottomDeque(deque_t, tour_s); */
+  /* PushBottomDeque(deque_t, tour_q); */
   /* PrintDeque(deque_t); */
 
   /* PrintTourInfo(PopTopDeque(deque_t)); */
+  /* PrintTourInfo(PopBottomDeque(deque_t)); */
 
   /* PrintDeque(deque_t); */
   return 0;

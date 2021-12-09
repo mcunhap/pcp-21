@@ -42,8 +42,17 @@ tour* Get(circular_array* c_array, int i) {
   return c_array->tours[i % c_array->capacity];
 }
 
-void Put(circular_array* c_array, int i, tour* tour) {
-  c_array->tours[i % c_array->capacity] = tour;
+void Put(circular_array* c_array, int i, tour* tour_t) {
+  c_array->tours[i % c_array->capacity] = tour_t;
+}
+
+void PutCopy(circular_array* c_array, int i, tour* tour_t) {
+  int tour_size = GetTourMaxCities(tour_t);
+  tour* tour_tmp = CreateTour(tour_size);
+
+  CopyTour(tour_tmp, tour_t);
+
+  c_array->tours[i % c_array->capacity] = tour_tmp;
 }
 
 void FreeCircularArray(circular_array* c_array) {
@@ -59,13 +68,15 @@ int GetCapacity(circular_array* c_array) {
 }
 
 circular_array* Resize(circular_array* c_array, int bottom, int top) {
-  circular_array* new_c_array = CreateCircularArray(c_array + 1);
+  printf("resize...\n");
+  circular_array* new_c_array = CreateCircularArray(c_array->capacity + 1);
 
   for(int i=top; i < bottom; i++) {
-    Put(new_c_array, i, Get(c_array, i));
+    PutCopy(new_c_array, i, Get(c_array, i));
   }
 
   FreeCircularArray(c_array);
+
   return new_c_array;
 }
 

@@ -26,6 +26,8 @@ tour* Get(circular_array* c_array, int i);
 
 void Put(circular_array* c_array, int i, tour* tour);
 
+void PutCopy(circular_array* c_array, int i, tour* tour);
+
 void FreeCircularArray(circular_array* c_array);
 
 int GetCapacity(circular_array* c_array);
