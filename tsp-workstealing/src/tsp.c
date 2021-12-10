@@ -91,11 +91,11 @@ int Termination(stack* my_stack, term* term_t, int num_threads) {
   }
 }
 
-void EvaluateTours(stack* stack_t, graph* graph_t, float* best_tour, pthread_mutex_t evaluate_mutex, term* term_t, int n_cities, int hometown, int num_threads) {
+void EvaluateTours(deque* deque_t, graph* graph_t, float* best_tour, pthread_mutex_t evaluate_mutex, term* term_t, int n_cities, int hometown, int num_threads) {
   tour* current_tour;
 
-  while(!Termination(stack_t, term_t, num_threads)) {
-    current_tour = Pop(stack_t);
+  while(!EmptyDeque(deque_t)) {
+    current_tour = PopBottomDeque(deque_t);
 
     if(GetTourNumberCities(current_tour) == n_cities) {
       // add hometown to current tour to compute the final cost
@@ -118,7 +118,7 @@ void EvaluateTours(stack* stack_t, graph* graph_t, float* best_tour, pthread_mut
             continue;
           }
 
-          PushCopy(stack_t, current_tour);
+          PushBottomDeque(deque_t, current_tour);
           RemoveLastCity(current_tour, graph_t);
         }
       }
@@ -143,7 +143,7 @@ void FillBFSQueue(int num_instances, graph* graph_t, queue* bfs_queue, tour* ini
     }
   }
 
-  while(SizeQueue(bfs_queue) < num_instances) {
+  while(SizeQueue(bfs_queue) <= num_instances) {
     current_tour = Dequeue(bfs_queue);
     int last_city = GetTourLastCity(current_tour);
 
@@ -162,12 +162,12 @@ void FillBFSQueue(int num_instances, graph* graph_t, queue* bfs_queue, tour* ini
   }
 }
 
-void ShareQueue(int num_instances, stack** stacks, queue* queue_t) {
+void ShareQueue(int num_instances, deque** deques, queue* queue_t) {
   int i = 0;
 
   while(!EmptyQueue(queue_t)) {
-    stack* current_stack = stacks[i % num_instances];
-    PushCopy(current_stack, Dequeue(queue_t));
+    deque* current_deque = deques[i % num_instances];
+    PushBottomDeque(current_deque, Dequeue(queue_t));
 
     i++;
   }

@@ -23,6 +23,8 @@ typedef struct deque_t deque;
 
 deque* CreateDeque(int capacity);
 
+void FreeDeque(deque* deque_t);
+
 int GetTop(deque* deque_t);
 
 int EmptyDeque(deque* deque_t);

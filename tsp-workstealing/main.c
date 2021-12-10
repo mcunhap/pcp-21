@@ -28,7 +28,7 @@
 
 #define HOMETOWN 0
 #define NUM_THREADS 4
-#define FILENAME "instances/5.txt"
+#define FILENAME "instances/8.txt"
 
 int n_cities;
 int* nodes;
@@ -37,12 +37,12 @@ float best_tour;
 graph* graph_t;
 pthread_mutex_t execute_mutex;
 term* term_t;
-stack* threads_stacks[NUM_THREADS];
+deque* threads_deque[NUM_THREADS];
 
 void* execute(void* arg) {
-  int my_stack = (int)arg;
+  int my_deque = (int)arg;
 
-  EvaluateTours(threads_stacks[my_stack], graph_t, &best_tour, execute_mutex, term_t, NumNodes(graph_t), HOMETOWN, NUM_THREADS);
+  EvaluateTours(threads_deque[my_deque], graph_t, &best_tour, execute_mutex, term_t, NumNodes(graph_t), HOMETOWN, NUM_THREADS);
 
   pthread_exit(NULL);
 }
@@ -50,12 +50,12 @@ void* execute(void* arg) {
 void ThreadsSplit(queue* bfs_queue) {
   int error;
 
-  // Initialize threads stacks
+  // Initialize threads deque
   for(int i=0; i<NUM_THREADS; i++) {
-    threads_stacks[i] = CreateStack((n_cities*n_cities)/2);
+    threads_deque[i] = CreateDeque((n_cities*n_cities)/2);
   }
 
-  ShareQueue(NUM_THREADS, threads_stacks, bfs_queue);
+  ShareQueue(NUM_THREADS, threads_deque, bfs_queue);
 
   pthread_t* workers = (pthread_t*) calloc (NUM_THREADS, sizeof(pthread_t));
   if (!workers) { exit(-1); }
@@ -71,7 +71,7 @@ void ThreadsSplit(queue* bfs_queue) {
   }
 
   for(int i=0; i < NUM_THREADS; i++) {
-    FreeStack(threads_stacks[i]);
+    FreeDeque(threads_deque[i]);
   }
 }
 
@@ -126,7 +126,7 @@ int main(void) {
   printf("\nBEST TOUR: \n");
   printf("Best tour: %.2f", best_tour);
 
-  /* deque* deque_t = CreateDeque(2); */
+  /* deque* deque_t = CreateDeque(5); */
   /* tour* tour_t = CreateTour(n_cities + 1); */
   /* tour* tour_s = CreateTour(n_cities + 1); */
   /* tour* tour_q = CreateTour(n_cities + 1); */
@@ -142,6 +142,7 @@ int main(void) {
 
   /* PrintTourInfo(PopTopDeque(deque_t)); */
   /* PrintTourInfo(PopBottomDeque(deque_t)); */
+  /* PopBottomDeque(deque_t); */
 
   /* PrintDeque(deque_t); */
   return 0;

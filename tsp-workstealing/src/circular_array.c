@@ -56,10 +56,6 @@ void PutCopy(circular_array* c_array, int i, tour* tour_t) {
 }
 
 void FreeCircularArray(circular_array* c_array) {
-  for(int i=0; i< c_array->capacity; i++) {
-    free(c_array->tours[i]);
-  }
-
   free(c_array->tours);
 }
 

@@ -42,6 +42,11 @@ deque* CreateDeque(int capacity) {
   return deque_t;
 }
 
+void FreeDeque(deque* deque_t) {
+  FreeCircularArray(deque_t->c_array);
+  free(deque_t);
+}
+
 int GetTop(deque* deque_t) {
   int top;
 
@@ -74,7 +79,7 @@ void PushBottomDeque(deque* deque_t, tour* tour_t) {
     deque_t->c_array = current_c_array;
   }
 
-  Put(deque_t->c_array, old_bottom, tour_t);
+  PutCopy(deque_t->c_array, old_bottom, tour_t);
   deque_t->bottom = old_bottom + 1;
 }
 
@@ -117,7 +122,8 @@ tour* PopBottomDeque(deque* deque_t) {
     return NULL;
   }
 
-  deque_t->bottom = old_top + 1;
+  /* deque_t->bottom = old_top + 1; */
+  deque_t->bottom = old_top;
   return tour_t;
 }
 
