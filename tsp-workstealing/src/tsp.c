@@ -39,62 +39,39 @@ term* CreateTerm() {
   return term_t;
 }
 
-int Termination(stack* my_stack, term* term_t, int num_threads) {
-  int my_stack_size = GetSize(my_stack);
+int Termination(deque** deques, int my_id, int num_threads) {
+  deque* my_deque = deques[my_id];
+  tour* top_tour;
 
-  if(my_stack_size >= 2 && term_t->threads_in_cond_wait > 0 && term_t->new_stack == NULL) {
-    pthread_mutex_lock(&term_t->term_mutex);
-
-    if(term_t->threads_in_cond_wait > 0 && term_t->new_stack == NULL) {
-      /* printf("splitting stack...\n"); */
-      term_t->new_stack = SplitStack(my_stack);
-
-      pthread_cond_signal(&term_t->term_cond_var);
-    }
-
-    pthread_mutex_unlock(&term_t->term_mutex);
-
-    return 0;
-  } else if (!Empty(my_stack)) {
+  if (!EmptyDeque(my_deque)) {
+    /* printf("1\n"); */
     return 0;
   } else {
-    pthread_mutex_lock(&term_t->term_mutex);
+    /* printf("2\n"); */
+    for(int i=0; i < num_threads; i++) {
+      if(i == my_id) { continue; }
 
-    if(term_t->threads_in_cond_wait == num_threads - 1) {
-      // last thread running
-      term_t->threads_in_cond_wait++;
-      pthread_cond_broadcast(&term_t->term_cond_var);
+      deque* current_deque = deques[i];
+      top_tour = PopTopDeque(current_deque);
 
-      pthread_mutex_unlock(&term_t->term_mutex);
-
-      return 1;
-    } else {
-      // other threads stil working... wait for work
-      term_t->threads_in_cond_wait++;
-      while(pthread_cond_wait(&term_t->term_cond_var, &term_t->term_mutex) != 0);
-
-      if(term_t->threads_in_cond_wait < num_threads) {
-        CopyStack(term_t->new_stack, my_stack);
-
-        term_t->new_stack = NULL;
-        term_t->threads_in_cond_wait--;
-
-        pthread_mutex_unlock(&term_t->term_mutex);
-
+      if(top_tour != NULL) {
+        /* printf("%d: poped from %d top... ", my_id, i); */
+        PushBottomDeque(my_deque, top_tour);
         return 0;
-      } else {
-        pthread_mutex_unlock(&term_t->term_mutex);
-
-        return 1;
       }
     }
   }
+
+  /* printf("3\n"); */
+  return 1;
 }
 
-void EvaluateTours(deque* deque_t, graph* graph_t, float* best_tour, pthread_mutex_t evaluate_mutex, term* term_t, int n_cities, int hometown, int num_threads) {
+void EvaluateTours(deque** deques, graph* graph_t, float* best_tour, pthread_mutex_t evaluate_mutex, term* term_t, int n_cities, int hometown, int num_threads, int my_id) {
   tour* current_tour;
+  deque* deque_t = deques[my_id];
 
-  while(!EmptyDeque(deque_t)) {
+  /* while(!EmptyDeque(deque_t)) { */
+  while(!Termination(deques, my_id, num_threads)) {
     current_tour = PopBottomDeque(deque_t);
 
     if(GetTourNumberCities(current_tour) == n_cities) {

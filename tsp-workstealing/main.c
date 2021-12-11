@@ -28,7 +28,7 @@
 
 #define HOMETOWN 0
 #define NUM_THREADS 4
-#define FILENAME "instances/8.txt"
+#define FILENAME "instances/12.txt"
 
 int n_cities;
 int* nodes;
@@ -40,9 +40,9 @@ term* term_t;
 deque* threads_deque[NUM_THREADS];
 
 void* execute(void* arg) {
-  int my_deque = (int)arg;
+  int my_id = (int)arg;
 
-  EvaluateTours(threads_deque[my_deque], graph_t, &best_tour, execute_mutex, term_t, NumNodes(graph_t), HOMETOWN, NUM_THREADS);
+  EvaluateTours(threads_deque, graph_t, &best_tour, execute_mutex, term_t, NumNodes(graph_t), HOMETOWN, NUM_THREADS, my_id);
 
   pthread_exit(NULL);
 }
