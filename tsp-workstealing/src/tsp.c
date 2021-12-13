@@ -19,6 +19,16 @@
 #include <stdio.h>
 #include "../headers/tsp.h"
 
+int AllDequesEmpty(deque** deques, int num_threads) {
+  for(int i=0; i < num_threads; i++) {
+    if(SizeDeque(deques[i]) > 0) {
+      return 0;
+    }
+  }
+
+  return 1;
+}
+
 int Termination(deque** deques, int my_id, int num_threads, pthread_mutex_t top_mutex) {
   deque* my_deque = deques[my_id];
   tour* top_tour = NULL;
@@ -43,8 +53,13 @@ int Termination(deque** deques, int my_id, int num_threads, pthread_mutex_t top_
     }
   }
 
+  if(top_tour == NULL && AllDequesEmpty(deques, num_threads)) {
+    pthread_mutex_unlock(&top_mutex);
+    return 1;
+  }
+
   pthread_mutex_unlock(&top_mutex);
-  return 1;
+  return 0;
 }
 
 void EvaluateTours(deque** deques, graph* graph_t, float* best_tour, pthread_mutex_t evaluate_mutex, pthread_mutex_t top_mutex, int n_cities, int hometown, int num_threads, int my_id) {

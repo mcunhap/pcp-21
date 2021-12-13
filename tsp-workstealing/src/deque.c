@@ -127,11 +127,11 @@ tour* PopBottomDeque(deque* deque_t) {
   return tour_t;
 }
 
+int SizeDeque(deque* deque_t) {
+  return deque_t->bottom - deque_t->top;
+}
+
 void PrintDeque(deque* deque_t) {
   printf("Top: %d, Bottom: %d\n", deque_t->top, deque_t->bottom);
   PrintCArray(deque_t->c_array, deque_t->bottom, deque_t->top);
 }
-
-
-
-

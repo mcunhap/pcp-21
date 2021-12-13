@@ -35,4 +35,6 @@ tour* PopTopDeque(deque* deque_t);
 
 tour* PopBottomDeque(deque* deque_t);
 
+int SizeDeque(deque* deque_t);
+
 void PrintDeque(deque* deque_t);
