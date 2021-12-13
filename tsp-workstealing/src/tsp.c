@@ -39,15 +39,35 @@ term* CreateTerm() {
   return term_t;
 }
 
-int Termination(deque** deques, int my_id, int num_threads) {
+int Termination(deque** deques, int my_id, int num_threads, pthread_mutex_t top_mutex, term* term_t) {
   deque* my_deque = deques[my_id];
-  tour* top_tour;
+  tour* top_tour = NULL;
+  /* int i = 0; */
 
   if (!EmptyDeque(my_deque)) {
-    /* printf("1\n"); */
     return 0;
   } else {
-    /* printf("2\n"); */
+    pthread_mutex_lock(&top_mutex);
+
+    /* term_t->threads_in_cond_wait++; */
+
+    /* while(top_tour == NULL) { */
+    /*   if(i == my_id) { continue; } */
+
+    /*   deque* current_deque = deques[i]; */
+    /*   top_tour = PopTopDeque(current_deque); */
+
+    /*   i++; */
+    /*   if(i >= num_threads) { i = 0; }; */
+    /*   if(term_t->threads_in_cond_wait == num_threads - 1) { return 1; } */
+    /* } */
+
+    /* term_t->threads_in_cond_wait--; */
+
+    /* PushBottomDeque(my_deque, top_tour); */
+    /* pthread_mutex_unlock(&top_mutex); */
+    /* return 0; */
+
     for(int i=0; i < num_threads; i++) {
       if(i == my_id) { continue; }
 
@@ -55,23 +75,22 @@ int Termination(deque** deques, int my_id, int num_threads) {
       top_tour = PopTopDeque(current_deque);
 
       if(top_tour != NULL) {
-        /* printf("%d: poped from %d top... ", my_id, i); */
         PushBottomDeque(my_deque, top_tour);
+        pthread_mutex_unlock(&top_mutex);
         return 0;
       }
     }
   }
 
-  /* printf("3\n"); */
+  pthread_mutex_unlock(&top_mutex);
   return 1;
 }
 
-void EvaluateTours(deque** deques, graph* graph_t, float* best_tour, pthread_mutex_t evaluate_mutex, term* term_t, int n_cities, int hometown, int num_threads, int my_id) {
+void EvaluateTours(deque** deques, graph* graph_t, float* best_tour, pthread_mutex_t evaluate_mutex, pthread_mutex_t top_mutex, term* term_t, int n_cities, int hometown, int num_threads, int my_id) {
   tour* current_tour;
   deque* deque_t = deques[my_id];
 
-  /* while(!EmptyDeque(deque_t)) { */
-  while(!Termination(deques, my_id, num_threads)) {
+  while(!Termination(deques, my_id, num_threads, top_mutex, term_t)) {
     current_tour = PopBottomDeque(deque_t);
 
     if(GetTourNumberCities(current_tour) == n_cities) {
@@ -95,7 +114,9 @@ void EvaluateTours(deque** deques, graph* graph_t, float* best_tour, pthread_mut
             continue;
           }
 
+          pthread_mutex_lock(&top_mutex);
           PushBottomDeque(deque_t, current_tour);
+          pthread_mutex_unlock(&top_mutex);
           RemoveLastCity(current_tour, graph_t);
         }
       }

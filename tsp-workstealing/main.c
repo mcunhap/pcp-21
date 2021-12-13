@@ -36,13 +36,14 @@ float** adj_m;
 float best_tour;
 graph* graph_t;
 pthread_mutex_t execute_mutex;
+pthread_mutex_t top_mutex;
 term* term_t;
 deque* threads_deque[NUM_THREADS];
 
 void* execute(void* arg) {
   int my_id = (int)arg;
 
-  EvaluateTours(threads_deque, graph_t, &best_tour, execute_mutex, term_t, NumNodes(graph_t), HOMETOWN, NUM_THREADS, my_id);
+  EvaluateTours(threads_deque, graph_t, &best_tour, execute_mutex, top_mutex, term_t, NumNodes(graph_t), HOMETOWN, NUM_THREADS, my_id);
 
   pthread_exit(NULL);
 }
@@ -109,6 +110,7 @@ int main(void) {
   best_tour = -1;
   term_t = CreateTerm();
   pthread_mutex_init(&execute_mutex, NULL);
+  pthread_mutex_init(&top_mutex, NULL);
 
   // Initial tour
   tour* initial_tour = CreateTour(n_cities + 1);
@@ -142,8 +144,13 @@ int main(void) {
 
   /* PrintTourInfo(PopTopDeque(deque_t)); */
   /* PrintTourInfo(PopBottomDeque(deque_t)); */
+  /* PopTopDeque(deque_t); */
+  /* PopBottomDeque(deque_t); */
+  /* PopBottomDeque(deque_t); */
+
   /* PopBottomDeque(deque_t); */
 
   /* PrintDeque(deque_t); */
+  /* printf("%d\n", EmptyDeque(deque_t)); */
   return 0;
 }

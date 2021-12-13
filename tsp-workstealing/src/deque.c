@@ -23,7 +23,6 @@ struct deque_t {
   circular_array* c_array;
   int top;
   int bottom;
-  pthread_mutex_t top_mutex;
 };
 
 deque* CreateDeque(int capacity) {
@@ -37,7 +36,6 @@ deque* CreateDeque(int capacity) {
   deque_t->c_array = CreateCircularArray(capacity);
   deque_t->top = 0;
   deque_t->bottom = 0;
-  pthread_mutex_init(&deque_t->top_mutex, NULL);
 
   return deque_t;
 }
@@ -50,9 +48,7 @@ void FreeDeque(deque* deque_t) {
 int GetTop(deque* deque_t) {
   int top;
 
-  pthread_mutex_lock(&deque_t->top_mutex);
   top = deque_t->top;
-  pthread_mutex_unlock(&deque_t->top_mutex);
 
   return top;
 }
@@ -75,11 +71,13 @@ void PushBottomDeque(deque* deque_t, tour* tour_t) {
   circular_array* current_c_array = deque_t->c_array;
 
   if(size >= GetCapacity(current_c_array)) {
+    printf("resize...\n");
     current_c_array = Resize(current_c_array, old_bottom, old_top);
     deque_t->c_array = current_c_array;
   }
 
   PutCopy(deque_t->c_array, old_bottom, tour_t);
+
   deque_t->bottom = old_bottom + 1;
 }
 
@@ -89,7 +87,10 @@ tour* PopTopDeque(deque* deque_t) {
   int old_bottom = deque_t->bottom;
   int size = old_bottom - old_top;
 
-  if(size <= 0) { return NULL; }
+  if(size <= 0) {
+    printf("empty deque!\n");
+    return NULL;
+  }
 
   tour* tour_t = Get(deque_t->c_array, old_top);
 

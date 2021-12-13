@@ -27,7 +27,7 @@ typedef struct term_t term;
 
 term* CreateTerm();
 
-void EvaluateTours(deque** deques, graph* graph_t, float* best_tour, pthread_mutex_t evaluate_mutex, term* term_t, int n_cities, int hometown, int num_threads, int my_id);
+void EvaluateTours(deque** deques, graph* graph_t, float* best_tour, pthread_mutex_t evaluate_mutex, pthread_mutex_t top_mutex, term* term_t, int n_cities, int hometown, int num_threads, int my_id);
 
 void FillBFSQueue(int num_instances, graph* graph_t, queue* bfs_queue, tour* initial_tour);
 
