@@ -13,12 +13,47 @@ O Workstealing consiste em "roubar" da fila de outra thread uma _task_ caso a su
 
 ### Desenvolvimento
 
-Foi utilizado como base o trabalho anterior, onde foi desenvolvido o TSP com MPI e Threads. Para desenvolvimento do cenário atual, foram feitar modificações no código original em duas etapas. A primeira para garantir o funcionamento do TSP sem o MPI e com balanceamento de threads por divisão das stack (como era a proposta do trabalho anterior). A segunda com objetivo de modificar a estrutura de dados de stack para deque, e adicionar o workstealing em vez do stack split para balanceamento das threads.
+Foi utilizado como base o trabalho anterior, onde foi desenvolvido o TSP com MPI e Threads. Para desenvolvimento do cenário atual, foram feitar modificações no código original em duas etapas. A primeira para garantir o funcionamento do TSP sem o MPI e com balanceamento de threads por divisão das stack (como era a proposta do trabalho anterior). A segunda com objetivo de modificar a estrutura de dados de stack para deque, e adicionar o workstealing em vez do stack split para balanceamento das threads.  
+O método para verificar a finalização do TSP esta abaixo. Ele funciona de maneira que continue o processamento caso a fila da thread não esteja vazia, e caso contrário tenta "roubar" a rota de uma das outras threads.
+
+	int Termination(deque** deques, int my_id, int num_threads, pthread_mutex_t top_mutex) {
+  		deque* my_deque = deques[my_id];
+  		tour* top_tour = NULL;
+
+  		if (!EmptyDeque(my_deque)) {
+    		return 0;
+  		} else {
+    		pthread_mutex_lock(&top_mutex);
+
+    		for(int i=0; i < num_threads; i++) {
+      			if(i == my_id) { continue; }
+
+      			deque* current_deque = deques[i];
+      			top_tour = PopTopDeque(current_deque);
+
+      			if(top_tour != NULL) {
+       			PushBottomDeque(my_deque, top_tour);
+        			pthread_mutex_unlock(&top_mutex);
+        			return 0;
+      			}
+    		}
+  		}
+
+  		if(top_tour == NULL && AllDequesEmpty(deques, num_threads)) {
+    		pthread_mutex_unlock(&top_mutex);
+    		return 1;
+  		}
+
+  		pthread_mutex_unlock(&top_mutex);
+  		return 0;
+	}
+
+
 
 
 #### Testes
 
-Foram feitos testes para instância de 12 cidades e verificado o tempo de execução para 2 ou 4 threads.
+Foram feitos testes para instância de 12 cidades e verificado o tempo de execução para 2 ou 4 threads. Podemos notar que a execução para 4 threads tem um tempo de execução menor.
 
 #####Instância com 12 cidades:
 
@@ -38,20 +73,18 @@ Foram feitos testes para instância de 12 cidades e verificado o tempo de execu�
 
 	2 threads
 	
-	[inf2591-06@server parallel-tsp]$ mpirun -np 1 --hostfile host_file ./main
 	Cities number:
 	12
-	
+
 	BEST TOUR:
 	Best tour: 1733.00
-	Total execution time: 2.10s
+	2 threads, execution time: 365288us
 	-------------------------------------
 	4 threads
 	
-	[inf2591-06@server parallel-tsp]$ mpirun -np 1 --hostfile host_file ./main
 	Cities number:
 	12
-	
+
 	BEST TOUR:
 	Best tour: 1733.00
-	Total execution time: 2.69s
+	4 threads, execution time: 224461us

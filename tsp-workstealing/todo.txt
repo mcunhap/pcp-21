@@ -1,7 +1,0 @@
-- threads stack tem que ser global (OK)
-- tem que passar como parametro para a thread apenas o "numero" dela, com isso consegue saber qual a stack dela e quais as outras que ela pode tentar "roubar" (caso a dela fique vazia)
-- implementar estrutura que suporte workstealing (seguir o que o livro propoe)
-- testar bem essa estrutura
-- acoplar ela no projeto de maneira que, caso a fila da thread fique vazia, entao ela tenta roubar da fila de uma das outras threads
-
-- Usamos uma pilha por thread para ir gerando as novas rotas que devem ser computadas. O exemplo de work-stealing é com fila. Podemos fazer similar com a pilha? De maneira que seja uma pilha circular e o espaço para roubar seja a base da pilha? Faço de maneira que as pilhas sejam globais e sempre que uma thread terminar com suas tarefas ela tenta roubar de qualquer uma das outras pilhas.
