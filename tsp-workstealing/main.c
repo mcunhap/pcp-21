@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <pthread.h>
+#include <sys/time.h>
 #include "headers/tour.h"
 #include "headers/graph.h"
 #include "headers/tsp.h"
@@ -26,7 +27,7 @@
 #include "headers/deque.h"
 
 #define HOMETOWN 0
-#define NUM_THREADS 4
+#define NUM_THREADS 2
 #define FILENAME "instances/12.txt"
 
 int n_cities;
@@ -37,6 +38,21 @@ graph* graph_t;
 pthread_mutex_t execute_mutex;
 pthread_mutex_t top_mutex;
 deque* threads_deque[NUM_THREADS];
+
+long long int total_exec_time_us(void (*func)(queue*), queue* bfs_queue) {
+  struct timeval tempo_inicio, tempo_fim;
+  long long int inicio_us, fim_us;
+
+  gettimeofday(&tempo_inicio, NULL);
+  inicio_us = (tempo_inicio.tv_sec + (tempo_inicio.tv_usec / 1000000.0)) * 1000000;
+
+  func(bfs_queue);
+
+  gettimeofday(&tempo_fim, NULL);
+  fim_us = (tempo_fim.tv_sec + (tempo_fim.tv_usec / 1000000.0)) * 1000000;
+
+  return fim_us - inicio_us;
+}
 
 void* execute(void* arg) {
   int my_id = (int)arg;
@@ -96,6 +112,7 @@ void InitializeInstance() {
 }
 
 int main(void) {
+  long long int exec_time;
   ReadNCities(&n_cities);
   AllocateInputs(n_cities);
   InitializeInstance();
@@ -117,13 +134,14 @@ int main(void) {
   queue* bfs_queue = CreateQueue((n_cities*n_cities)/2);
   FillBFSQueue(NUM_THREADS, graph_t, bfs_queue, initial_tour);
 
-  ThreadsSplit(bfs_queue);
+  exec_time = total_exec_time_us(ThreadsSplit, bfs_queue);
 
   FreeQueue(bfs_queue);
   FreeGraph(graph_t);
 
   printf("\nBEST TOUR: \n");
-  printf("Best tour: %.2f", best_tour);
+  printf("Best tour: %.2f\n", best_tour);
+  printf("%d threads, execution time: %lldus\n", NUM_THREADS, exec_time);
 
   return 0;
 }
