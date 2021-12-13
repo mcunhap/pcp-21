@@ -31,7 +31,7 @@ queue* CreateQueue(int max_size) {
   queue* queue_t = (queue*) calloc (1, sizeof(queue));
 
   if(!queue_t) {
-    printf("Failed to create stack.\n");
+    printf("Failed to create queue.\n");
     exit(-1);
   }
 

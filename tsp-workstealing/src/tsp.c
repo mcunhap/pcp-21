@@ -19,30 +19,9 @@
 #include <stdio.h>
 #include "../headers/tsp.h"
 
-struct term_t {
-  stack* new_stack;
-  int threads_in_cond_wait;
-  pthread_cond_t term_cond_var;
-  pthread_mutex_t term_mutex;
-};
-
-term* CreateTerm() {
-  term* term_t = (term*) calloc (1, sizeof(term));
-
-  if(!term_t) { printf("Failed to create term.\n"); exit(-1); }
-
-  term_t->new_stack = NULL;
-  term_t->threads_in_cond_wait = 0;
-  pthread_cond_init(&term_t->term_cond_var, NULL);
-  pthread_mutex_init(&term_t->term_mutex, NULL);
-
-  return term_t;
-}
-
-int Termination(deque** deques, int my_id, int num_threads, pthread_mutex_t top_mutex, term* term_t) {
+int Termination(deque** deques, int my_id, int num_threads, pthread_mutex_t top_mutex) {
   deque* my_deque = deques[my_id];
   tour* top_tour = NULL;
-  /* int i = 0; */
 
   if (!EmptyDeque(my_deque)) {
     return 0;
@@ -68,11 +47,11 @@ int Termination(deque** deques, int my_id, int num_threads, pthread_mutex_t top_
   return 1;
 }
 
-void EvaluateTours(deque** deques, graph* graph_t, float* best_tour, pthread_mutex_t evaluate_mutex, pthread_mutex_t top_mutex, term* term_t, int n_cities, int hometown, int num_threads, int my_id) {
+void EvaluateTours(deque** deques, graph* graph_t, float* best_tour, pthread_mutex_t evaluate_mutex, pthread_mutex_t top_mutex, int n_cities, int hometown, int num_threads, int my_id) {
   tour* current_tour;
   deque* deque_t = deques[my_id];
 
-  while(!Termination(deques, my_id, num_threads, top_mutex, term_t)) {
+  while(!Termination(deques, my_id, num_threads, top_mutex)) {
     current_tour = PopBottomDeque(deque_t);
     // if after try get job from anothers deques still get NULL job, then skip to try again
     if(current_tour == NULL) { continue; }

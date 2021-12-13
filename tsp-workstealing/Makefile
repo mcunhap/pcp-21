@@ -1,5 +1,4 @@
 .SILENT:
-.DEFAULT_GOAL := help
 
 COLOR_RESET = \033[0m
 COLOR_COMMAND = \033[36m
@@ -12,7 +11,7 @@ PROJECT := Parallel TSP Workstealing
 CFLAGS = -Wall
 
 ## Object files
-_OBJ_FILES = tour.o stack.o graph.o tsp.o utils.o queue.o circular_array.o deque.o
+_OBJ_FILES = tour.o graph.o tsp.o utils.o queue.o circular_array.o deque.o
 OBJ_FILES = $(_OBJ_FILES:%.o=./src/obj/%.o)
 
 ## Build imagem Docker
@@ -25,10 +24,6 @@ run: build
 
 ## Make tour dependency
 tour: ./src/tour.c ./headers/tour.h
-	gcc $(CFLAGS) -c $< -o ./src/obj/$@.o
-
-## Make stack dependency
-stack: ./src/stack.c ./headers/stack.h
 	gcc $(CFLAGS) -c $< -o ./src/obj/$@.o
 
 ## Make graph dependency
@@ -58,7 +53,6 @@ deque: ./src/deque.c ./headers/deque.h
 ## Make project dependencies
 dependencies:
 	make tour
-	make stack
 	make graph
 	make tsp
 	make utils

@@ -19,7 +19,6 @@
 #include <stdio.h>
 #include <pthread.h>
 #include "headers/tour.h"
-#include "headers/stack.h"
 #include "headers/graph.h"
 #include "headers/tsp.h"
 #include "headers/utils.h"
@@ -37,13 +36,12 @@ float best_tour;
 graph* graph_t;
 pthread_mutex_t execute_mutex;
 pthread_mutex_t top_mutex;
-term* term_t;
 deque* threads_deque[NUM_THREADS];
 
 void* execute(void* arg) {
   int my_id = (int)arg;
 
-  EvaluateTours(threads_deque, graph_t, &best_tour, execute_mutex, top_mutex, term_t, NumNodes(graph_t), HOMETOWN, NUM_THREADS, my_id);
+  EvaluateTours(threads_deque, graph_t, &best_tour, execute_mutex, top_mutex, NumNodes(graph_t), HOMETOWN, NUM_THREADS, my_id);
 
   pthread_exit(NULL);
 }
@@ -108,7 +106,6 @@ int main(void) {
 
   // Initialize globals
   best_tour = -1;
-  term_t = CreateTerm();
   pthread_mutex_init(&execute_mutex, NULL);
   pthread_mutex_init(&top_mutex, NULL);
 
@@ -128,29 +125,5 @@ int main(void) {
   printf("\nBEST TOUR: \n");
   printf("Best tour: %.2f", best_tour);
 
-  /* deque* deque_t = CreateDeque(5); */
-  /* tour* tour_t = CreateTour(n_cities + 1); */
-  /* tour* tour_s = CreateTour(n_cities + 1); */
-  /* tour* tour_q = CreateTour(n_cities + 1); */
-  /* AddCity(tour_t, graph_t, 1); */
-  /* AddCity(tour_t, graph_t, 2); */
-  /* AddCity(tour_s, graph_t, 3); */
-  /* AddCity(tour_q, graph_t, 4); */
-
-  /* PushBottomDeque(deque_t, tour_t); */
-  /* PushBottomDeque(deque_t, tour_s); */
-  /* PushBottomDeque(deque_t, tour_q); */
-  /* PrintDeque(deque_t); */
-
-  /* PrintTourInfo(PopTopDeque(deque_t)); */
-  /* PrintTourInfo(PopBottomDeque(deque_t)); */
-  /* PopTopDeque(deque_t); */
-  /* PopBottomDeque(deque_t); */
-  /* PopBottomDeque(deque_t); */
-
-  /* PopBottomDeque(deque_t); */
-
-  /* PrintDeque(deque_t); */
-  /* printf("%d\n", EmptyDeque(deque_t)); */
   return 0;
 }
