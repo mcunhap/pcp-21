@@ -49,25 +49,7 @@ int Termination(deque** deques, int my_id, int num_threads, pthread_mutex_t top_
   } else {
     pthread_mutex_lock(&top_mutex);
 
-    /* term_t->threads_in_cond_wait++; */
-
-    /* while(top_tour == NULL) { */
-    /*   if(i == my_id) { continue; } */
-
-    /*   deque* current_deque = deques[i]; */
-    /*   top_tour = PopTopDeque(current_deque); */
-
-    /*   i++; */
-    /*   if(i >= num_threads) { i = 0; }; */
-    /*   if(term_t->threads_in_cond_wait == num_threads - 1) { return 1; } */
-    /* } */
-
-    /* term_t->threads_in_cond_wait--; */
-
-    /* PushBottomDeque(my_deque, top_tour); */
-    /* pthread_mutex_unlock(&top_mutex); */
-    /* return 0; */
-
+    // can iterate in all deque and still get NULL, so in external loop we jump to try again
     for(int i=0; i < num_threads; i++) {
       if(i == my_id) { continue; }
 
@@ -92,6 +74,8 @@ void EvaluateTours(deque** deques, graph* graph_t, float* best_tour, pthread_mut
 
   while(!Termination(deques, my_id, num_threads, top_mutex, term_t)) {
     current_tour = PopBottomDeque(deque_t);
+    // if after try get job from anothers deques still get NULL job, then skip to try again
+    if(current_tour == NULL) { continue; }
 
     if(GetTourNumberCities(current_tour) == n_cities) {
       // add hometown to current tour to compute the final cost

@@ -88,7 +88,6 @@ tour* PopTopDeque(deque* deque_t) {
   int size = old_bottom - old_top;
 
   if(size <= 0) {
-    printf("empty deque!\n");
     return NULL;
   }
 
