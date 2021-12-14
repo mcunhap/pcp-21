@@ -122,7 +122,6 @@ tour* PopBottomDeque(deque* deque_t) {
     return NULL;
   }
 
-  /* deque_t->bottom = old_top + 1; */
   deque_t->bottom = old_top;
   return tour_t;
 }

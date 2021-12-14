@@ -27,8 +27,8 @@
 #include "headers/deque.h"
 
 #define HOMETOWN 0
-#define NUM_THREADS 4
-#define FILENAME "instances/12.txt"
+#define NUM_THREADS 2
+#define FILENAME "instances/15.txt"
 
 int n_cities;
 int* nodes;
